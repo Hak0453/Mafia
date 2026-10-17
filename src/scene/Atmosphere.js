@@ -1,10 +1,8 @@
 /**
  * 1930s NOIR ATMOSPHERE, LIGHTING & PARTICLES
  * -------------------------------------------
- * - Banker's lamp warm point light with subtle organic filament flicker
- * - Window moonlight directional light casting slatted shadows
- * - Rising cigarette/cigar smoke wisps from the ashtray
- * - Floating dust motes in the room air
+ * Illuminates the honey-oak desk, twin M1911 pistols, mottled ashtray,
+ * keychain, map, green dome lamp, and rotary telephone just like the Mafia 1 video.
  */
 
 import * as THREE from 'three';
@@ -13,36 +11,35 @@ import { THEME } from '../config.js';
 export class Atmosphere {
   constructor(scene, smokeOrigin) {
     this.scene = scene;
-    this.smokeOrigin = smokeOrigin || new THREE.Vector3(0.39, 0.87, 0.235);
+    this.smokeOrigin = smokeOrigin || new THREE.Vector3(0.59, 0.91, 0.02);
 
     this.setupLighting();
     this.setupCigaretteSmoke();
-    this.setupDustMotes();
   }
 
   setupLighting() {
-    // 1. Soft warm ambient base
+    // 1. Warm ambient light so the honey-oak wood grain and gunmetal are clearly visible
     this.ambientLight = new THREE.AmbientLight(
       THEME.ambientLight.color,
       THEME.ambientLight.intensity
     );
     this.scene.add(this.ambientLight);
 
-    // 2. Banker's desk lamp warm spotlight/pointlight
+    // 2. Warm golden light radiating from under the Green Dome Lamp onto the desk
     this.lampLight = new THREE.PointLight(
       THEME.lampLight.color,
       THEME.lampLight.intensity,
       THEME.lampLight.distance,
       THEME.lampLight.decay
     );
-    this.lampLight.position.set(-0.56, 1.24, -0.35);
+    this.lampLight.position.set(-0.18, 1.35, -0.15);
     this.lampLight.castShadow = true;
-    this.lampLight.shadow.mapSize.width = 1024;
-    this.lampLight.shadow.mapSize.height = 1024;
-    this.lampLight.shadow.bias = -0.002;
+    this.lampLight.shadow.mapSize.width = 2048;
+    this.lampLight.shadow.mapSize.height = 2048;
+    this.lampLight.shadow.bias = -0.0015;
     this.scene.add(this.lampLight);
 
-    // 3. Cool street/moonlight streaming through left Venetian blinds
+    // 3. Key directional light from upper-right/front creating the specular sheen on the M1911 slides & wood grain
     this.windowLight = new THREE.DirectionalLight(
       THEME.windowLight.color,
       THEME.windowLight.intensity
@@ -53,24 +50,24 @@ export class Atmosphere {
       THEME.windowLight.position.z
     );
     this.windowLight.castShadow = true;
-    this.windowLight.shadow.mapSize.width = 1024;
-    this.windowLight.shadow.mapSize.height = 1024;
-    this.windowLight.shadow.camera.near = 0.5;
-    this.windowLight.shadow.camera.far = 12;
+    this.windowLight.shadow.mapSize.width = 2048;
+    this.windowLight.shadow.mapSize.height = 2048;
+    this.windowLight.shadow.camera.near = 0.2;
+    this.windowLight.shadow.camera.far = 10;
     this.scene.add(this.windowLight);
 
-    // 4. Subtle crimson/amber backroom fill light
+    // 4. Warm fill light over the foreground pistols & ashtray
     this.fillLight = new THREE.PointLight(
       THEME.fillLight.color,
       THEME.fillLight.intensity,
-      8
+      6
     );
-    this.fillLight.position.set(1.8, 2.2, 1.6);
+    this.fillLight.position.set(0.35, 1.45, 0.65);
     this.scene.add(this.fillLight);
   }
 
   setupCigaretteSmoke() {
-    this.smokeCount = 42;
+    this.smokeCount = 38;
     const positions = new Float32Array(this.smokeCount * 3);
     this.smokeData = [];
 
@@ -78,11 +75,11 @@ export class Atmosphere {
       const progress = i / this.smokeCount;
       this.smokeData.push({
         age: progress,
-        speed: 0.14 + Math.random() * 0.06,
+        speed: 0.12 + Math.random() * 0.05,
         phase: Math.random() * Math.PI * 2
       });
       positions[i * 3] = this.smokeOrigin.x;
-      positions[i * 3 + 1] = this.smokeOrigin.y + progress * 0.75;
+      positions[i * 3 + 1] = this.smokeOrigin.y + progress * 0.55;
       positions[i * 3 + 2] = this.smokeOrigin.z;
     }
 
@@ -90,10 +87,10 @@ export class Atmosphere {
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     const mat = new THREE.PointsMaterial({
-      color: 0xc8c2b8,
-      size: 0.045,
+      color: 0xd8d4cc,
+      size: 0.032,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.24,
       depthWrite: false,
       blending: THREE.AdditiveBlending
     });
@@ -102,51 +99,21 @@ export class Atmosphere {
     this.scene.add(this.smokePoints);
   }
 
-  setupDustMotes() {
-    const count = 90;
-    const positions = new Float32Array(count * 3);
-
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 4.5;
-      positions[i * 3 + 1] = 0.7 + Math.random() * 2.4;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 3.5;
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const mat = new THREE.PointsMaterial({
-      color: 0xffdfb0,
-      size: 0.018,
-      transparent: true,
-      opacity: 0.35,
-      depthWrite: false
-    });
-
-    this.dustPoints = new THREE.Points(geo, mat);
-    this.scene.add(this.dustPoints);
-  }
-
   update(elapsedTime, deltaTime) {
-    // 1. Subtle organic filament flicker on banker's lamp
-    const flicker =
-      Math.sin(elapsedTime * 13.0) * 0.04 +
-      Math.sin(elapsedTime * 29.0) * 0.03 +
-      Math.cos(elapsedTime * 3.7) * THEME.lampLight.flickerAmount;
+    // Gentle warm lamp glow variation
+    const flicker = Math.sin(elapsedTime * 7.0) * THEME.lampLight.flickerAmount;
     this.lampLight.intensity = THEME.lampLight.intensity + flicker;
 
-    // 2. Update rising curling cigarette smoke
+    // Curling cigar smoke rising from the ashtray
     const posAttr = this.smokePoints.geometry.attributes.position;
     for (let i = 0; i < this.smokeCount; i++) {
       const p = this.smokeData[i];
       p.age += deltaTime * p.speed;
-      if (p.age > 1.0) {
-        p.age = 0;
-      }
+      if (p.age > 1.0) p.age = 0;
 
-      const height = p.age * 0.85;
-      const curlX = Math.sin(elapsedTime * 1.6 + p.phase + p.age * 5.0) * (0.045 * p.age);
-      const curlZ = Math.cos(elapsedTime * 1.3 + p.phase + p.age * 4.0) * (0.045 * p.age);
+      const height = p.age * 0.55;
+      const curlX = Math.sin(elapsedTime * 1.5 + p.phase + p.age * 4.5) * (0.032 * p.age);
+      const curlZ = Math.cos(elapsedTime * 1.2 + p.phase + p.age * 3.8) * (0.032 * p.age);
 
       posAttr.setXYZ(
         i,
@@ -156,8 +123,5 @@ export class Atmosphere {
       );
     }
     posAttr.needsUpdate = true;
-
-    // 3. Gently drift room dust motes
-    this.dustPoints.rotation.y = elapsedTime * 0.018;
   }
 }

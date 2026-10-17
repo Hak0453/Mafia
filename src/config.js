@@ -1,59 +1,50 @@
 /**
  * CENTRAL CONFIGURATION — MAFIA 1 PERSONAL SITE SKELETON
  * ------------------------------------------------------
- * Edit this single file to customize:
- * 1. Site title, subtitle, and audio settings
- * 2. Lighting colors, fog density, and atmosphere
- * 3. Menu items, camera waypoints (position + target), 3D object mappings, and HTML content
- * 4. Optional custom .glb 3D model paths (drop files into /public/models/)
+ * Recreates the exact look, camera framing, props, and Vladimir Simunek orchestral
+ * soundtrack of Mafia: The City of Lost Heaven (2002) Main Menu
+ * (https://www.youtube.com/watch?v=e7XH-nSMXYM)
  */
 
 export const SITE_META = {
-  title: 'MAFIA',
-  subtitle: 'THE CITY OF LOST HEAVEN • PORTFOLIO',
-  // Optional: drop an .mp3 into public/audio/theme.mp3 and set customAudioUrl: '/audio/theme.mp3'
-  // Leave null to use the built-in WebAudio 1930s Orchestral Noir Theme synthesizer!
-  customAudioUrl: null
+  title: 'Main Menu:',
+  subtitle: 'THE CITY OF LOST HEAVEN',
+  // Plays the real Mafia: The City of Lost Heaven Main Theme (Vladimir Simunek) from public/audio/theme.mp3
+  customAudioUrl: '/audio/theme.mp3'
 };
 
 export const THEME = {
-  backgroundColor: 0x080605,
-  fogColor: 0x080605,
-  fogDensity: 0.065,
+  backgroundColor: 0x261c14,
+  fogColor: 0x261c14,
+  fogDensity: 0.04,
 
-  // Warm green banker's desk lamp
+  // Warm golden table lamp light illuminating the honey-oak wood & M1911 pistols
   lampLight: {
-    color: 0xff9e44,
-    intensity: 5.5,
-    distance: 9,
-    decay: 1.6,
-    flickerAmount: 0.18
+    color: 0xffd699,
+    intensity: 6.5,
+    distance: 10,
+    decay: 1.2,
+    flickerAmount: 0.06
   },
 
-  // Cool 1930s street/moonlight coming through the Venetian blinds
+  // Warm overhead/front room light so the wood grain & gunmetal shine clearly like in the video
   windowLight: {
-    color: 0x5c7d99,
-    intensity: 2.2,
-    position: { x: -3.8, y: 3.4, z: -2.2 }
+    color: 0xfff0d6,
+    intensity: 2.8,
+    position: { x: 0.6, y: 2.8, z: 1.6 }
   },
 
-  // Subtle crimson/warm fill light from the room interior
   fillLight: {
-    color: 0x8c2d19,
-    intensity: 0.65
+    color: 0xffc580,
+    intensity: 1.8
   },
 
   ambientLight: {
-    color: 0x241a14,
-    intensity: 0.9
+    color: 0x8a6d52,
+    intensity: 1.75
   }
 };
 
-/**
- *Optional custom GLB overrides:
- * Set `modelPath: '/models/my-fedora.glb'` on any prop below to replace its procedural mesh
- * with your own 3D model automatically!
- */
 export const CUSTOM_MODELS = {
   dossier: { modelPath: null, scale: 1.0, positionOffset: { x: 0, y: 0, z: 0 } },
   operations: { modelPath: null, scale: 1.0, positionOffset: { x: 0, y: 0, z: 0 } },
@@ -63,120 +54,145 @@ export const CUSTOM_MODELS = {
 
 /**
  * MENU SECTIONS & CAMERA WAYPOINTS
- * Use the in-app "CAMERA TUNER [C]" button to test new angles and copy coordinates here.
+ * Default `overview` matches the exact main menu frame from the YouTube video:
+ * looking down at the two Colt M1911 pistols, the cigar ashtray on the right,
+ * the LH leather keychain & map on the left, the green dome lamp top-left, and the rotary phone top-right.
  */
 export const SECTIONS = [
   {
     id: 'overview',
-    title: 'THE OFFICE',
-    subtitle: 'MAIN DESK',
+    title: 'Main Desk',
+    subtitle: 'Overview',
     kicker: 'SALIERI BAR • BACK ROOM',
-    objectName: null, // Wide shot
-    cameraPos: { x: 0.25, y: 2.15, z: 3.35 },
-    cameraTarget: { x: 0.0, y: 1.05, z: -0.4 },
-    content: null // Null hides the right-side dossier panel so you enjoy the full 3D scene
+    objectName: null,
+    cameraPos: { x: 0.06, y: 1.54, z: 0.68 },
+    cameraTarget: { x: 0.04, y: 0.82, z: 0.04 },
+    content: null
   },
   {
-    id: 'dossier',
-    title: 'DOSSIER',
-    subtitle: 'ABOUT ME',
-    kicker: 'PERSONNEL FILE NO. 1930-01',
-    objectName: 'prop_dossier',
-    tooltip: 'Inspect Personnel Dossier & Typewriter',
-    cameraPos: { x: -0.05, y: 1.72, z: 0.92 },
-    cameraTarget: { x: -0.08, y: 0.82, z: -0.05 },
+    id: 'lamp_intro',
+    title: 'Intro',
+    subtitle: 'Green Lamp & Photo',
+    kicker: '1930 • LOST HEAVEN CHRONICLES',
+    objectName: 'prop_lamp',
+    tooltip: 'Green Dome Lamp & Family Photo',
+    // Matches frame 2.jpg from the video (front view of the green dome lamp, gang photo on left, phone on right)
+    cameraPos: { x: -0.22, y: 1.18, z: 0.42 },
+    cameraTarget: { x: -0.24, y: 0.98, z: -0.45 },
     content: `
       <p>
-        Welcome to my office. This is a customizable <strong>Three.js</strong> personal site
-        skeleton inspired by the classic 2002 <em>Mafia: The City of Lost Heaven</em> main menu.
+        <strong>Welcome to Lost Heaven (1930).</strong> This interactive 3D scene recreates the iconic
+        <em>Mafia: The City of Lost Heaven</em> main menu desk, complete with Vladimír Šimůnek's
+        original orchestral Main Theme.
       </p>
       <p>
-        Every menu item and interactive object on the desk smoothly pans the camera to a dedicated
-        waypoint in 3D space. Edit <code>src/config.js</code> to update this text, tweak camera
-        coordinates, adjust lighting, or swap any desk prop with your own <code>.glb</code> models.
+        Click any item on the crumpled paper menu on the left—or click the <strong>Colt M1911 pistols,
+        leather keychain, city map, sepia gang photo, or rotary telephone</strong> directly on the
+        table—to smoothly pan the camera across the desk.
       </p>
       <div class="tag-list">
-        <span class="noir-tag">CREATIVE DEVELOPER</span>
-        <span class="noir-tag">THREE.JS / WEBGL</span>
-        <span class="noir-tag">FULL-STACK</span>
-        <span class="noir-tag">LOST HEAVEN</span>
-      </div>
-    `
-  },
-  {
-    id: 'operations',
-    title: 'OPERATIONS',
-    subtitle: 'PROJECTS',
-    kicker: 'CASE BOARD & BLUEPRINTS',
-    objectName: 'prop_operations',
-    tooltip: 'Examine Investigation Pinboard on Wall',
-    cameraPos: { x: 0.45, y: 2.05, z: 0.65 },
-    cameraTarget: { x: 0.55, y: 1.92, z: -1.45 },
-    content: `
-      <p>
-        Major operations, commissions, and interactive experiments pinned to the back-room board.
-      </p>
-      <div class="dossier-grid">
-        <div class="dossier-item">
-          <h4>OPERATION: LOST HEAVEN 3D</h4>
-          <p>Interactive 1930s noir office scene with procedural props, volumetric slatted shadows, and GSAP camera choreography.</p>
-        </div>
-        <div class="dossier-item">
-          <h4>OPERATION: NIGHT RUNNER</h4>
-          <p>Replace this card in <code>src/config.js</code> with your featured GitHub repositories, live demos, and case studies.</p>
-        </div>
-        <div class="dossier-item">
-          <h4>OPERATION: SILENT ARCHIVE</h4>
-          <p>Custom WebGL shaders, real-time audio synthesis, and high-performance frontend architecture.</p>
-        </div>
+        <span class="noir-tag">THREE.JS</span>
+        <span class="noir-tag">GSAP CAMERA</span>
+        <span class="noir-tag">MAFIA 1 (2002)</span>
       </div>
     `
   },
   {
     id: 'arsenal',
-    title: 'ARSENAL',
-    subtitle: 'SKILLS & TECH',
-    kicker: 'TOOLS OF THE TRADE',
+    title: 'New Game',
+    subtitle: 'Twin M1911s & Cigar',
+    kicker: 'ARSENAL • SKILLS & TECH',
     objectName: 'prop_arsenal',
-    tooltip: 'Inspect Fedora, Pocket Watch & Revolver',
-    cameraPos: { x: 1.25, y: 1.55, z: 0.95 },
-    cameraTarget: { x: 0.82, y: 0.86, z: -0.12 },
+    tooltip: 'Inspect Twin Colt M1911 Pistols & Cigar Ashtray',
+    cameraPos: { x: 0.12, y: 1.32, z: 0.54 },
+    cameraTarget: { x: 0.14, y: 0.82, z: 0.16 },
     content: `
       <p>
-        Every job requires the right instruments. Here are the tools and technologies ready on the table:
+        Two Colt M1911 semi-automatic sidearms resting on the honey-oak desk alongside a smoldering cigar.
+        Customize this section in <code>src/config.js</code> with your core technical arsenal:
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
-          <h4>3D &amp; GRAPHICS</h4>
-          <p>Three.js, WebGL, GLSL Shaders, Blender, GSAP Animation, Post-Processing</p>
+          <h4>3D &amp; INTERACTIVE GRAPHICS</h4>
+          <p>Three.js, WebGL, GLSL Shaders, Procedural Texturing, Blender, GSAP Camera Choreography</p>
         </div>
         <div class="dossier-item">
-          <h4>FRONTEND &amp; ARCHITECTURE</h4>
-          <p>JavaScript / TypeScript, React, Next.js, Vite, CSS Architecture, Web Audio API</p>
+          <h4>FULL-STACK ENGINEERING</h4>
+          <p>JavaScript / TypeScript, React, Next.js, Node.js, High-Performance Web Architecture</p>
         </div>
       </div>
       <div class="tag-list">
         <span class="noir-tag">THREE.JS</span>
+        <span class="noir-tag">WEBGL</span>
         <span class="noir-tag">GSAP</span>
         <span class="noir-tag">TYPESCRIPT</span>
         <span class="noir-tag">REACT</span>
-        <span class="noir-tag">BLENDER</span>
-        <span class="noir-tag">NODE.JS</span>
+      </div>
+    `
+  },
+  {
+    id: 'dossier',
+    title: 'Load Game',
+    subtitle: 'Map & Keychain',
+    kicker: 'DOSSIER • ABOUT & TERRITORY',
+    objectName: 'prop_dossier',
+    tooltip: 'Inspect Lost Heaven Map & LH Keychain',
+    cameraPos: { x: -0.52, y: 1.34, z: 0.56 },
+    cameraTarget: { x: -0.56, y: 0.82, z: 0.18 },
+    content: `
+      <p>
+        The folded street map of Lost Heaven and brass-medallion leather key fob. Use this section
+        for your personal bio, background, and career timeline.
+      </p>
+      <div class="dossier-grid">
+        <div class="dossier-item">
+          <h4>TERRITORY &amp; BACKGROUND</h4>
+          <p>Creative Developer &amp; Engineer building atmospheric 3D web experiences and modern applications.</p>
+        </div>
+        <div class="dossier-item">
+          <h4>EASY CUSTOMIZATION</h4>
+          <p>Open <code>src/config.js</code> to edit menu labels, HTML cards, lighting, or drop custom <code>.glb</code> models into <code>public/models/</code>.</p>
+        </div>
+      </div>
+    `
+  },
+  {
+    id: 'operations',
+    title: 'Carcyclopedia',
+    subtitle: 'Projects & Crew Photo',
+    kicker: 'OPERATIONS • FEATURED WORK',
+    objectName: 'prop_operations',
+    tooltip: 'Examine 1930s Family Photograph',
+    cameraPos: { x: -0.62, y: 1.15, z: 0.14 },
+    cameraTarget: { x: -0.74, y: 0.96, z: -0.42 },
+    content: `
+      <p>
+        Featured projects, case studies, and operations from the archive:
+      </p>
+      <div class="dossier-grid">
+        <div class="dossier-item">
+          <h4>01. LOST HEAVEN 3D MENU</h4>
+          <p>Faithful Three.js recreation of the 2002 Mafia main menu desk with twin M1911s, cigar smoke, and original soundtrack.</p>
+        </div>
+        <div class="dossier-item">
+          <h4>02. ADD YOUR NEXT PROJECT</h4>
+          <p>Edit the <code>SECTIONS</code> array in <code>src/config.js</code> to link your GitHub repos and live demos.</p>
+        </div>
       </div>
     `
   },
   {
     id: 'telegram',
-    title: 'TELEGRAM',
-    subtitle: 'CONTACT',
-    kicker: 'DIRECT LINE • OPERATOR 402',
+    title: 'Options / Credits',
+    subtitle: 'Rotary Telephone',
+    kicker: 'DIRECT LINE • CONTACT',
     objectName: 'prop_telegram',
-    tooltip: 'Use Rotary Telephone & Telegram Pad',
-    cameraPos: { x: -1.15, y: 1.52, z: 1.02 },
-    cameraTarget: { x: -0.78, y: 0.88, z: -0.08 },
+    tooltip: 'Use Vintage Black Rotary Telephone',
+    cameraPos: { x: 0.36, y: 1.24, z: 0.28 },
+    cameraTarget: { x: 0.32, y: 0.9, z: -0.34 },
     content: `
       <p>
-        Need to set up a meeting or discuss a new proposition? Pick up the rotary line or send a wire directly.
+        Pick up the black rotary line on the corner of the desk to get in touch directly:
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
@@ -184,8 +200,8 @@ export const SECTIONS = [
           <p>your.name@example.com</p>
         </div>
         <div class="dossier-item">
-          <h4>DISPATCH CHANNELS</h4>
-          <p>GitHub • X / Twitter • LinkedIn</p>
+          <h4>PROFILES &amp; LINKS</h4>
+          <p>GitHub: github.com/Hak0453 • LinkedIn • X / Twitter</p>
         </div>
       </div>
     `

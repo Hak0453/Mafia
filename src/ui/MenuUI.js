@@ -1,10 +1,12 @@
 /**
  * MAFIA 1 DOM MENU, DOSSIER PANEL & CAMERA TUNER UI
  * -------------------------------------------------
- * Connects `src/config.js` sections to the left-side menu, right-side dossier overlay,
- * 3D hover tooltips, and live Camera Tuner [C] panel.
+ * Renders the authentic top-left crumpled paper menu from Mafia: The City of Lost Heaven,
+ * unlocks and plays the real Vladimir Simunek Main Theme (`public/audio/theme.mp3`),
+ * and triggers camera pans across the honey-oak desk.
  */
 
+import gsap from 'gsap';
 import { SITE_META, SECTIONS } from '../config.js';
 
 export class MenuUI {
@@ -15,7 +17,6 @@ export class MenuUI {
 
     // DOM elements
     this.titleEl = document.getElementById('site-title');
-    this.subtitleEl = document.getElementById('site-subtitle');
     this.menuNavEl = document.getElementById('menu-nav');
     this.mainMenuEl = document.getElementById('main-menu');
 
@@ -29,6 +30,7 @@ export class MenuUI {
     this.tooltipTitleEl = document.getElementById('tooltip-title');
     this.tooltipSubEl = document.getElementById('tooltip-sub');
 
+    this.btnPanTour = document.getElementById('btn-pan-tour');
     this.btnAudio = document.getElementById('btn-audio');
     this.audioLed = document.getElementById('audio-led');
     this.audioLabel = document.getElementById('audio-label');
@@ -49,31 +51,33 @@ export class MenuUI {
       tarZ: document.getElementById('sl-tar-z')
     };
 
-    this.introOverlay = document.getElementById('intro-overlay');
-    this.btnEnter = document.getElementById('btn-enter');
-
     this.init();
   }
 
   init() {
     this.titleEl.textContent = SITE_META.title;
-    this.subtitleEl.textContent = SITE_META.subtitle;
-
     this.renderMenuItems();
     this.bindEvents();
     this.syncDebugSlidersToCurrent();
+
+    // Auto-start orchestral soundtrack on first user click anywhere if browser blocked autoplay
+    const unlockAudioOnce = () => {
+      if (!this.soundManager.isPlaying) {
+        this.soundManager.start();
+        this.updateAudioHUD(true);
+      }
+      window.removeEventListener('pointerdown', unlockAudioOnce);
+    };
+    window.addEventListener('pointerdown', unlockAudioOnce);
   }
 
   renderMenuItems() {
     this.menuNavEl.innerHTML = '';
     SECTIONS.forEach((section) => {
       const btn = document.createElement('button');
-      btn.className = `menu-item ${section.id === this.activeSectionId ? 'active' : ''}`;
+      btn.className = `paper-menu-item ${section.id === this.activeSectionId ? 'active' : ''}`;
       btn.dataset.sectionId = section.id;
-      btn.innerHTML = `
-        <span>${section.title}</span>
-        <span class="menu-item-sub">${section.subtitle}</span>
-      `;
+      btn.textContent = section.title;
 
       btn.addEventListener('mouseenter', () => {
         this.soundManager.playHoverSound();
@@ -88,20 +92,16 @@ export class MenuUI {
   }
 
   bindEvents() {
-    // Enter button unlocks WebAudio and starts dramatic zoom into the office
-    this.btnEnter.addEventListener('click', () => {
-      this.introOverlay.classList.add('dismissed');
-      const playing = this.soundManager.toggle();
-      this.updateAudioHUD(playing);
-      this.soundManager.playSelectSound();
-      this.selectSection('overview');
-    });
-
     this.btnBack.addEventListener('click', () => {
       this.selectSection('overview');
     });
 
-    this.btnAudio.addEventListener('click', () => {
+    this.btnPanTour.addEventListener('click', () => {
+      this.playVideoCameraPan();
+    });
+
+    this.btnAudio.addEventListener('click', (e) => {
+      e.stopPropagation();
       const playing = this.soundManager.toggle();
       this.updateAudioHUD(playing);
     });
@@ -118,7 +118,6 @@ export class MenuUI {
       }
     });
 
-    // Live slider updates for Camera Tuner
     Object.values(this.sliders).forEach((slider) => {
       slider.addEventListener('input', () => {
         const pos = {
@@ -150,6 +149,30 @@ export class MenuUI {
     });
   }
 
+  /**
+   * Replays the iconic slow camera pan from the Mafia 1 YouTube video:
+   * Starts facing the Green Dome Lamp, Gang Photo & Rotary Phone (2.jpg),
+   * then pans down across the Map & Keychain to settle over the Twin M1911 Pistols & Cigar Ashtray (maxres.jpg).
+   */
+  playVideoCameraPan() {
+    this.panelEl.classList.add('hidden');
+    const pos = this.cameraController.basePosition;
+    const tar = this.cameraController.lookAtTarget;
+
+    gsap.killTweensOf(pos);
+    gsap.killTweensOf(tar);
+
+    // Start at Green Dome Lamp & Sepia Photo view (frame 2.jpg)
+    pos.set(-0.22, 1.16, 0.44);
+    tar.set(-0.22, 0.98, -0.45);
+
+    const tl = gsap.timeline();
+    tl.to(pos, { x: -0.18, y: 1.38, z: 0.62, duration: 4.0, ease: 'sine.inOut' }, 0)
+      .to(tar, { x: -0.15, y: 0.84, z: -0.05, duration: 4.0, ease: 'sine.inOut' }, 0)
+      .to(pos, { x: 0.06, y: 1.54, z: 0.68, duration: 4.5, ease: 'power1.inOut' }, 4.0)
+      .to(tar, { x: 0.04, y: 0.82, z: 0.04, duration: 4.5, ease: 'power1.inOut' }, 4.0);
+  }
+
   selectSection(sectionId) {
     const section = SECTIONS.find((s) => s.id === sectionId);
     if (!section) return;
@@ -158,22 +181,18 @@ export class MenuUI {
     this.soundManager.playSelectSound();
     this.cameraController.transitionToSection(sectionId);
 
-    // Update active state on menu items
-    const buttons = this.menuNavEl.querySelectorAll('.menu-item');
+    const buttons = this.menuNavEl.querySelectorAll('.paper-menu-item');
     buttons.forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.sectionId === sectionId);
     });
 
-    // Show or hide the right-side dossier content panel
     if (section.content) {
       this.panelKickerEl.textContent = section.kicker || '';
-      this.panelTitleEl.textContent = section.title;
+      this.panelTitleEl.textContent = `${section.title} — ${section.subtitle}`;
       this.panelBodyEl.innerHTML = section.content;
       this.panelEl.classList.remove('hidden');
-      this.mainMenuEl.classList.add('minimized');
     } else {
       this.panelEl.classList.add('hidden');
-      this.mainMenuEl.classList.remove('minimized');
     }
 
     this.dbgSection.textContent = sectionId;
@@ -185,7 +204,7 @@ export class MenuUI {
       this.tooltipEl.classList.add('hidden');
       return;
     }
-    this.tooltipTitleEl.textContent = `${section.title} — ${section.subtitle}`;
+    this.tooltipTitleEl.textContent = `${section.title} (${section.subtitle})`;
     this.tooltipSubEl.textContent = section.tooltip || 'Click to inspect';
     this.tooltipEl.style.left = `${clientX}px`;
     this.tooltipEl.style.top = `${clientY}px`;
@@ -194,7 +213,7 @@ export class MenuUI {
 
   updateAudioHUD(playing) {
     this.audioLed.classList.toggle('active', playing);
-    this.audioLabel.textContent = playing ? 'GRAMOPHONE: ON' : 'GRAMOPHONE: OFF';
+    this.audioLabel.textContent = playing ? 'MAFIA THEME: ON' : 'MAFIA THEME: OFF';
   }
 
   toggleDebugPanel() {
