@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LOST HEAVEN — 1930s Noir Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Noir Film Grain & Vignette Overlays -->
+    <div class="vignette-overlay"></div>
+    <div class="film-grain"></div>
+
+    <!-- Top Bar: Sound Controls & Camera Tuner Toggle -->
+    <header class="hud-top">
+      <div class="brand-stamp">
+        <span class="stamp-year">EST. 1930</span>
+        <span class="stamp-divider">•</span>
+        <span class="stamp-city">LOST HEAVEN</span>
+      </div>
+
+      <div class="hud-controls">
+        <button id="btn-audio" class="hud-btn" title="Toggle Orchestral Noir Theme">
+          <span class="led-dot" id="audio-led"></span>
+          <span id="audio-label">GRAMOPHONE: OFF</span>
+        </button>
+        <button id="btn-debug" class="hud-btn" title="Toggle Camera Waypoint Tuner [C]">
+          <span>CAMERA TUNER [C]</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Classic Mafia 1 Left-Side Main Menu -->
+    <aside id="main-menu" class="mafia-menu">
+      <div class="menu-header">
+        <h1 id="site-title" class="mafia-title">MAFIA</h1>
+        <p id="site-subtitle" class="mafia-subtitle">THE CITY OF LOST HEAVEN</p>
+      </div>
+
+      <nav id="menu-nav" class="menu-list" aria-label="Main Menu">
+        <!-- Populated dynamically from src/config.js -->
+      </nav>
+
+      <div class="menu-footer">
+        <p class="menu-hint">SELECT AN ITEM OR CLICK OBJECTS ON THE DESK</p>
+      </div>
+    </aside>
+
+    <!-- Hover Tooltip for 3D Desk Objects -->
+    <div id="object-tooltip" class="object-tooltip hidden">
+      <span id="tooltip-title" class="tooltip-title"></span>
+      <span id="tooltip-sub" class="tooltip-sub"></span>
+    </div>
+
+    <!-- Zoomed-In Dossier / Content Modal Panel -->
+    <section id="section-panel" class="section-panel hidden" aria-live="polite">
+      <div class="dossier-card">
+        <div class="dossier-header">
+          <div>
+            <span id="panel-kicker" class="dossier-kicker">FILE NO. 1930-A</span>
+            <h2 id="panel-title" class="dossier-title">DOSSIER</h2>
+          </div>
+          <button id="btn-back" class="btn-return" title="Return to Desk [ESC]">
+            ← RETURN TO DESK <span class="key-hint">[ESC]</span>
+          </button>
+        </div>
+        <div class="dossier-divider"></div>
+        <div id="panel-body" class="dossier-body">
+          <!-- Populated from src/config.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Camera & Scene Tuner (For easy customization) -->
+    <aside id="debug-panel" class="debug-panel hidden">
+      <div class="debug-title">CAMERA &amp; SCENE TUNER</div>
+      <div class="debug-row">
+        <span>Active Section:</span>
+        <strong id="dbg-section">overview</strong>
+      </div>
+      <div class="debug-row">
+        <span>Cam Pos:</span>
+        <code id="dbg-pos">0, 0, 0</code>
+      </div>
+      <div class="debug-row">
+        <span>LookAt Target:</span>
+        <code id="dbg-target">0, 0, 0</code>
+      </div>
+      <div class="debug-sliders">
+        <label>Cam X <input type="range" id="sl-cam-x" min="-6" max="6" step="0.05" /></label>
+        <label>Cam Y <input type="range" id="sl-cam-y" min="0.5" max="5" step="0.05" /></label>
+        <label>Cam Z <input type="range" id="sl-cam-z" min="-3" max="7" step="0.05" /></label>
+        <label>Target X <input type="range" id="sl-tar-x" min="-5" max="5" step="0.05" /></label>
+        <label>Target Y <input type="range" id="sl-tar-y" min="0" max="4" step="0.05" /></label>
+        <label>Target Z <input type="range" id="sl-tar-z" min="-5" max="3" step="0.05" /></label>
+      </div>
+      <button id="btn-copy-cam" class="hud-btn full-width">COPY CONFIG SNIPPET</button>
+    </aside>
+
+    <!-- Initial Click-to-Enter Noir Splash (Unlocks WebAudio & Starts Camera Pan) -->
+    <div id="intro-overlay" class="intro-overlay">
+      <div class="intro-box">
+        <p class="intro-year">LOST HEAVEN • 1930</p>
+        <h2 class="intro-heading">ENTER THE OFFICE</h2>
+        <p class="intro-desc">
+          Interactive 3D Scene &amp; Orchestral Noir Theme
+        </p>
+        <button id="btn-enter" class="btn-enter">STEP INSIDE</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
