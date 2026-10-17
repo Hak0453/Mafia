@@ -162,15 +162,20 @@ export class MenuUI {
     gsap.killTweensOf(pos);
     gsap.killTweensOf(tar);
 
-    // Start at Green Dome Lamp & Sepia Photo view (frame 2.jpg)
-    pos.set(-0.22, 1.16, 0.44);
-    tar.set(-0.22, 0.98, -0.45);
+    // Start at full Room View (matching uploaded screenshot)
+    pos.set(-0.42, 2.08, 1.82);
+    tar.set(0.02, 0.64, -0.08);
 
     const tl = gsap.timeline();
-    tl.to(pos, { x: -0.18, y: 1.38, z: 0.62, duration: 4.0, ease: 'sine.inOut' }, 0)
-      .to(tar, { x: -0.15, y: 0.84, z: -0.05, duration: 4.0, ease: 'sine.inOut' }, 0)
-      .to(pos, { x: 0.06, y: 1.54, z: 0.68, duration: 4.5, ease: 'power1.inOut' }, 4.0)
-      .to(tar, { x: 0.04, y: 0.82, z: 0.04, duration: 4.5, ease: 'power1.inOut' }, 4.0);
+    // 1. Glide in toward the Typewriter, Framed Gang Photo & Green Dome Lamp
+    tl.to(pos, { x: -0.05, y: 1.24, z: 0.45, duration: 3.6, ease: 'power2.inOut' }, 0)
+      .to(tar, { x: 0.02, y: 0.92, z: -0.26, duration: 3.6, ease: 'power2.inOut' }, 0)
+      // 2. Pan across the Map & Keychain to the Twin Colt M1911 Pistols & Cigar Ashtray
+      .to(pos, { x: 0.34, y: 1.34, z: 0.62, duration: 3.8, ease: 'sine.inOut' }, 3.6)
+      .to(tar, { x: 0.44, y: 0.81, z: 0.14, duration: 3.8, ease: 'sine.inOut' }, 3.6)
+      // 3. Return smoothly to full Room View
+      .to(pos, { x: -0.42, y: 2.08, z: 1.82, duration: 3.2, ease: 'power2.inOut' }, 8.2)
+      .to(tar, { x: 0.02, y: 0.64, z: -0.08, duration: 3.2, ease: 'power2.inOut' }, 8.2);
   }
 
   selectSection(sectionId) {

@@ -1,47 +1,49 @@
 /**
  * CENTRAL CONFIGURATION — MAFIA 1 PERSONAL SITE SKELETON
  * ------------------------------------------------------
- * Recreates the exact look, camera framing, props, and Vladimir Simunek orchestral
- * soundtrack of Mafia: The City of Lost Heaven (2002) Main Menu
- * (https://www.youtube.com/watch?v=e7XH-nSMXYM)
+ * Default `overview` camera matches the exact "Room View" screenshot uploaded by the user:
+ * High-angle corner shot showing the full wooden desk, red-cushioned wooden chair,
+ * hardwood plank floor, left bookcase/trophy/cardboard box, right wastebasket,
+ * back wall pin-up posters, typewriter, green dome lamp, map, keychain, rotary phone,
+ * and photorealistic Colt M1911 pistols.
  */
 
 export const SITE_META = {
   title: 'Main Menu:',
   subtitle: 'THE CITY OF LOST HEAVEN',
-  // Plays the real Mafia: The City of Lost Heaven Main Theme (Vladimir Simunek) from public/audio/theme.mp3
+  // Plays the real Mafia: The City of Lost Heaven Main Theme (Vladimir Simunek)
   customAudioUrl: '/audio/theme.mp3'
 };
 
 export const THEME = {
-  backgroundColor: 0x261c14,
-  fogColor: 0x261c14,
-  fogDensity: 0.04,
+  backgroundColor: 0x1e1812,
+  fogColor: 0x1e1812,
+  fogDensity: 0.032,
 
-  // Warm golden table lamp light illuminating the honey-oak wood & M1911 pistols
+  // Warm golden pool of light under the Green Mushroom-Dome Lamp
   lampLight: {
-    color: 0xffd699,
-    intensity: 6.5,
-    distance: 10,
-    decay: 1.2,
-    flickerAmount: 0.06
+    color: 0xffd28a,
+    intensity: 6.8,
+    distance: 9,
+    decay: 1.25,
+    flickerAmount: 0.05
   },
 
-  // Warm overhead/front room light so the wood grain & gunmetal shine clearly like in the video
+  // Overhead/angled room light illuminating the chair, floor planks, and desk
   windowLight: {
-    color: 0xfff0d6,
-    intensity: 2.8,
-    position: { x: 0.6, y: 2.8, z: 1.6 }
+    color: 0xffebd2,
+    intensity: 2.3,
+    position: { x: 0.4, y: 3.1, z: 1.8 }
   },
 
   fillLight: {
-    color: 0xffc580,
-    intensity: 1.8
+    color: 0xffc078,
+    intensity: 1.5
   },
 
   ambientLight: {
-    color: 0x8a6d52,
-    intensity: 1.75
+    color: 0x7d654d,
+    intensity: 1.55
   }
 };
 
@@ -52,73 +54,41 @@ export const CUSTOM_MODELS = {
   telegram: { modelPath: null, scale: 1.0, positionOffset: { x: 0, y: 0, z: 0 } }
 };
 
-/**
- * MENU SECTIONS & CAMERA WAYPOINTS
- * Default `overview` matches the exact main menu frame from the YouTube video:
- * looking down at the two Colt M1911 pistols, the cigar ashtray on the right,
- * the LH leather keychain & map on the left, the green dome lamp top-left, and the rotary phone top-right.
- */
 export const SECTIONS = [
   {
     id: 'overview',
-    title: 'Main Desk',
-    subtitle: 'Overview',
+    title: 'Intro',
+    subtitle: 'Room View',
     kicker: 'SALIERI BAR • BACK ROOM',
     objectName: null,
-    cameraPos: { x: 0.06, y: 1.54, z: 0.68 },
-    cameraTarget: { x: 0.04, y: 0.82, z: 0.04 },
+    // Matches the exact high-angle Room View from the uploaded screenshot!
+    cameraPos: { x: -0.42, y: 2.08, z: 1.82 },
+    cameraTarget: { x: 0.02, y: 0.64, z: -0.08 },
     content: null
-  },
-  {
-    id: 'lamp_intro',
-    title: 'Intro',
-    subtitle: 'Green Lamp & Photo',
-    kicker: '1930 • LOST HEAVEN CHRONICLES',
-    objectName: 'prop_lamp',
-    tooltip: 'Green Dome Lamp & Family Photo',
-    // Matches frame 2.jpg from the video (front view of the green dome lamp, gang photo on left, phone on right)
-    cameraPos: { x: -0.22, y: 1.18, z: 0.42 },
-    cameraTarget: { x: -0.24, y: 0.98, z: -0.45 },
-    content: `
-      <p>
-        <strong>Welcome to Lost Heaven (1930).</strong> This interactive 3D scene recreates the iconic
-        <em>Mafia: The City of Lost Heaven</em> main menu desk, complete with Vladimír Šimůnek's
-        original orchestral Main Theme.
-      </p>
-      <p>
-        Click any item on the crumpled paper menu on the left—or click the <strong>Colt M1911 pistols,
-        leather keychain, city map, sepia gang photo, or rotary telephone</strong> directly on the
-        table—to smoothly pan the camera across the desk.
-      </p>
-      <div class="tag-list">
-        <span class="noir-tag">THREE.JS</span>
-        <span class="noir-tag">GSAP CAMERA</span>
-        <span class="noir-tag">MAFIA 1 (2002)</span>
-      </div>
-    `
   },
   {
     id: 'arsenal',
     title: 'New Game',
-    subtitle: 'Twin M1911s & Cigar',
+    subtitle: 'Twin M1911 Pistols',
     kicker: 'ARSENAL • SKILLS & TECH',
     objectName: 'prop_arsenal',
     tooltip: 'Inspect Twin Colt M1911 Pistols & Cigar Ashtray',
-    cameraPos: { x: 0.12, y: 1.32, z: 0.54 },
-    cameraTarget: { x: 0.14, y: 0.82, z: 0.16 },
+    // Matches the close-up tabletop angle on the two Colt M1911 pistols & ashtray
+    cameraPos: { x: 0.34, y: 1.34, z: 0.62 },
+    cameraTarget: { x: 0.44, y: 0.81, z: 0.14 },
     content: `
       <p>
-        Two Colt M1911 semi-automatic sidearms resting on the honey-oak desk alongside a smoldering cigar.
-        Customize this section in <code>src/config.js</code> with your core technical arsenal:
+        Two photorealistic <strong>Colt M1911 Service Pistols</strong> resting on the honey-oak desk
+        beside a smoldering cigar. Edit <code>src/config.js</code> to list your technical stack:
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
-          <h4>3D &amp; INTERACTIVE GRAPHICS</h4>
-          <p>Three.js, WebGL, GLSL Shaders, Procedural Texturing, Blender, GSAP Camera Choreography</p>
+          <h4>3D &amp; GRAPHICS</h4>
+          <p>Three.js, WebGL, PBR Materials &amp; GLTF Models, GSAP Camera Choreography</p>
         </div>
         <div class="dossier-item">
-          <h4>FULL-STACK ENGINEERING</h4>
-          <p>JavaScript / TypeScript, React, Next.js, Node.js, High-Performance Web Architecture</p>
+          <h4>FULL-STACK DEVELOPMENT</h4>
+          <p>JavaScript / TypeScript, React, Next.js, Node.js, Modern Web Architecture</p>
         </div>
       </div>
       <div class="tag-list">
@@ -134,24 +104,24 @@ export const SECTIONS = [
     id: 'dossier',
     title: 'Load Game',
     subtitle: 'Map & Keychain',
-    kicker: 'DOSSIER • ABOUT & TERRITORY',
+    kicker: 'DOSSIER • ABOUT ME',
     objectName: 'prop_dossier',
-    tooltip: 'Inspect Lost Heaven Map & LH Keychain',
-    cameraPos: { x: -0.52, y: 1.34, z: 0.56 },
-    cameraTarget: { x: -0.56, y: 0.82, z: 0.18 },
+    tooltip: 'Inspect Lost Heaven Map, Bullet & Keychain',
+    cameraPos: { x: -0.05, y: 1.32, z: 0.58 },
+    cameraTarget: { x: -0.04, y: 0.81, z: 0.08 },
     content: `
       <p>
-        The folded street map of Lost Heaven and brass-medallion leather key fob. Use this section
-        for your personal bio, background, and career timeline.
+        The unfolded street map of Lost Heaven, standing .45 cartridge, fountain pen, and leather
+        keychain fob. Customize this card in <code>src/config.js</code> with your bio and story.
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
-          <h4>TERRITORY &amp; BACKGROUND</h4>
-          <p>Creative Developer &amp; Engineer building atmospheric 3D web experiences and modern applications.</p>
+          <h4>BACKGROUND</h4>
+          <p>Creative Developer crafting atmospheric 3D web experiences and full-stack applications.</p>
         </div>
         <div class="dossier-item">
-          <h4>EASY CUSTOMIZATION</h4>
-          <p>Open <code>src/config.js</code> to edit menu labels, HTML cards, lighting, or drop custom <code>.glb</code> models into <code>public/models/</code>.</p>
+          <h4>CUSTOMIZATION</h4>
+          <p>All menu items, camera waypoints, lighting, and 3D models are controlled from <code>src/config.js</code>.</p>
         </div>
       </div>
     `
@@ -159,24 +129,24 @@ export const SECTIONS = [
   {
     id: 'operations',
     title: 'Carcyclopedia',
-    subtitle: 'Projects & Crew Photo',
+    subtitle: 'Projects & Photo',
     kicker: 'OPERATIONS • FEATURED WORK',
     objectName: 'prop_operations',
-    tooltip: 'Examine 1930s Family Photograph',
-    cameraPos: { x: -0.62, y: 1.15, z: 0.14 },
-    cameraTarget: { x: -0.74, y: 0.96, z: -0.42 },
+    tooltip: 'Examine Framed Family Photograph & Lamp',
+    cameraPos: { x: 0.04, y: 1.18, z: 0.36 },
+    cameraTarget: { x: 0.04, y: 0.92, z: -0.28 },
     content: `
       <p>
-        Featured projects, case studies, and operations from the archive:
+        Featured projects, case studies, and interactive builds:
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
-          <h4>01. LOST HEAVEN 3D MENU</h4>
-          <p>Faithful Three.js recreation of the 2002 Mafia main menu desk with twin M1911s, cigar smoke, and original soundtrack.</p>
+          <h4>01. MAFIA 1 OFFICE (THREE.JS)</h4>
+          <p>Interactive 1930s office scene with photorealistic M1911 GLTF models, typewriter, and Vladimir Šimůnek's orchestral Main Theme.</p>
         </div>
         <div class="dossier-item">
-          <h4>02. ADD YOUR NEXT PROJECT</h4>
-          <p>Edit the <code>SECTIONS</code> array in <code>src/config.js</code> to link your GitHub repos and live demos.</p>
+          <h4>02. YOUR NEXT PROJECT</h4>
+          <p>Update <code>SECTIONS</code> in <code>src/config.js</code> with your live links and GitHub repositories.</p>
         </div>
       </div>
     `
@@ -188,11 +158,11 @@ export const SECTIONS = [
     kicker: 'DIRECT LINE • CONTACT',
     objectName: 'prop_telegram',
     tooltip: 'Use Vintage Black Rotary Telephone',
-    cameraPos: { x: 0.36, y: 1.24, z: 0.28 },
-    cameraTarget: { x: 0.32, y: 0.9, z: -0.34 },
+    cameraPos: { x: 0.68, y: 1.24, z: 0.34 },
+    cameraTarget: { x: 0.76, y: 0.88, z: -0.22 },
     content: `
       <p>
-        Pick up the black rotary line on the corner of the desk to get in touch directly:
+        Pick up the black Bakelite rotary telephone on the corner of the desk to get in touch:
       </p>
       <div class="dossier-grid">
         <div class="dossier-item">
@@ -200,7 +170,7 @@ export const SECTIONS = [
           <p>your.name@example.com</p>
         </div>
         <div class="dossier-item">
-          <h4>PROFILES &amp; LINKS</h4>
+          <h4>LINKS</h4>
           <p>GitHub: github.com/Hak0453 • LinkedIn • X / Twitter</p>
         </div>
       </div>

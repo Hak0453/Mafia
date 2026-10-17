@@ -107,24 +107,34 @@ body {
  * ============================================================================ */
 .mafia-paper-menu {
   position: fixed;
-  top: 38px;
-  left: 48px;
+  top: 56px;
+  left: 52px;
   z-index: 12;
-  width: 268px;
+  width: 262px;
   box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.72),
-    0 2px 6px rgba(0, 0, 0, 0.6);
-  border: 2px solid #1a1817;
+    0 16px 40px rgba(0, 0, 0, 0.78),
+    0 3px 8px rgba(0, 0, 0, 0.65);
+  border: 2px solid #161514;
   background: #dcdcdc;
   transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
+.menu-paperclip {
+  position: absolute;
+  top: -26px;
+  left: -10px;
+  z-index: 16;
+  transform: rotate(12deg);
+  filter: drop-shadow(1px 3px 3px rgba(0, 0, 0, 0.75));
+  pointer-events: none;
+}
+
 /* Black header bar with cursive "Main Menu:" */
 .paper-header {
-  background: #080808;
-  padding: 8px 14px 10px;
+  background: #060606;
+  padding: 9px 14px 11px;
   text-align: center;
-  border-bottom: 3px solid #1e1e1e;
+  border-bottom: 3px dashed #1c1c1c;
   position: relative;
 }
 

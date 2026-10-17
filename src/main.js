@@ -1,12 +1,13 @@
 /**
  * MAFIA 1 PERSONAL SITE — MAIN THREE.JS ENTRY POINT
  * -------------------------------------------------
- * Sets up the WebGLRenderer, PerspectiveCamera, 1930s Office Room,
- * Noir Atmosphere (lamp flicker, blinds shadows, smoke), GSAP CameraController,
- * Orchestral Noir SoundManager, and MenuUI.
+ * Sets up the WebGLRenderer, PerspectiveCamera, PMREM RoomEnvironment (for realistic
+ * PBR reflections on the M1911 pistols, pocket watch, typewriter, and wood),
+ * 1930s Office Room, Noir Atmosphere, GSAP CameraController, and MenuUI.
  */
 
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { THEME } from './config.js';
 import { Room } from './scene/Room.js';
 import { Atmosphere } from './scene/Atmosphere.js';
@@ -31,10 +32,10 @@ class MafiaApp {
     this.scene.fog = new THREE.FogExp2(THEME.fogColor, THEME.fogDensity);
 
     this.camera = new THREE.PerspectiveCamera(
-      45,
+      42,
       window.innerWidth / window.innerHeight,
-      0.1,
-      50
+      0.08,
+      40
     );
 
     this.renderer = new THREE.WebGLRenderer({
@@ -46,7 +47,14 @@ class MafiaApp {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.05;
+
+    // Realistic PBR Image-Based Lighting (IBL) so gunmetal, brass, and wood look lifelike
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    if ('environmentIntensity' in this.scene) {
+      this.scene.environmentIntensity = 0.48;
+    }
 
     this.container.appendChild(this.renderer.domElement);
   }

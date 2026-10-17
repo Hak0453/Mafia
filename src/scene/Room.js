@@ -1,17 +1,21 @@
 /**
- * AUTHENTIC MAFIA: THE CITY OF LOST HEAVEN (2002) DESK SCENE
- * ----------------------------------------------------------
- * Recreates the exact table and props from the Mafia 1 Main Menu video
- * (https://www.youtube.com/watch?v=e7XH-nSMXYM):
- * - Warm honey-oak wooden desk surface with rich wood grain
- * - TWO Colt M1911 semi-automatic pistols lying in the center/foreground
- *   (gunmetal-bronze slides, silver ejection port, trigger guard, hammer, checkered walnut grips)
- * - Round mottled stone ashtray on the right with a thick brown cigar & white ash tip
- * - Leather teardrop keychain fob ("LH" medallion) + metal notched key on split ring
- * - Folded Lost Heaven street map on the left
- * - Green mushroom-dome table lamp with mottled turquoise ceramic base
- * - Vintage black rotary telephone with brass front tag & glowing rotary dial
- * - Sepia 1930s mobster family photograph propped near the lamp
+ * AUTHENTIC MAFIA: THE CITY OF LOST HEAVEN (2002) ROOM & DESK SCENE
+ * -----------------------------------------------------------------
+ * Replicates the exact room view from the uploaded Mafia 1 screenshot:
+ * - High-angle room perspective showing the full honey-oak desk, hardwood plank floor,
+ *   aged olive-grey plaster wall with 3 vintage pin-up posters & 1 B&W car photo
+ * - Pulled-out wooden desk chair with burnt-orange/red upholstered cushion in foreground
+ * - Left glass-door bookcase/cabinet, gold trophy cup on mahogany plinth, and printed
+ *   cardboard shipping box ("PLEASE HANDLE / PICK UP") on the floor
+ * - Right-side round slatted wastebasket (trash bin) on the floor
+ * - Photorealistic Poly Haven GLTF 3D models on the desk:
+ *   * Twin Colt M1911 Service Pistols (`service_pistol.gltf`) + standing .45 bullet on map
+ *   * Vintage Pocket Watch (`vintage_pocket_watch.gltf`)
+ *   * Standing Picture Frame (`standing_picture_frame_01.gltf`) with sepia gang photo
+ *   * Ornate Brass Trophy Goblet (`brass_goblets.gltf`)
+ * - Detailed sculpted 1930s Typewriter (42 round silver-ringed keys, dual ribbon spools, platen roller),
+ *   Lathe-sculpted Green Mushroom-Dome Lamp, Bakelite Rotary Telephone, Lathe-carved Stone Ashtray & Cigar,
+ *   Folded Lost Heaven Map, and Leather Keychain Fob & Key.
  */
 
 import * as THREE from 'three';
@@ -19,7 +23,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CUSTOM_MODELS } from '../config.js';
 import {
   createHoneyWoodTexture,
-  createPistolGripTexture,
+  createHardwoodFloorTexture,
+  createPlasterWallTexture,
+  createChairCushionTexture,
+  createCardboardBoxTexture,
+  createWallPosterTexture,
   createMottledAshtrayTexture,
   createLostHeavenMapTexture,
   createKeyFobMedallionTexture,
@@ -34,586 +42,1066 @@ export class Room {
     this.interactiveGroups = new Map();
     this.gltfLoader = new GLTFLoader();
 
-    // Generate procedural canvas textures matching the video
+    // High-res procedural & canvas textures
     this.woodTex = createHoneyWoodTexture();
-    this.gripTex = createPistolGripTexture();
+    this.floorTex = createHardwoodFloorTexture();
+    this.wallTex = createPlasterWallTexture();
+    this.cushionTex = createChairCushionTexture();
+    this.boxTex = createCardboardBoxTexture();
     this.ashtrayTex = createMottledAshtrayTexture();
     this.mapTex = createLostHeavenMapTexture();
     this.medallionTex = createKeyFobMedallionTexture();
     this.photoTex = createSepiaGangPhotoTexture();
     this.ceramicTex = createTurquoiseCeramicTexture();
 
-    this.buildRoomAndDesk();
+    this.buildRoomArchitecture();
+    this.buildWallPosters();
+    this.buildLeftCabinetAndCardboardBox();
+    this.buildDesk();
+    this.buildDeskChair();
+    this.buildWastebasket();
+
+    // Desk props (matching the exact left-to-right layout of the screenshot)
+    this.buildTypewriterAndPencilCup();
+    this.buildPocketWatchAndPen();
+    this.buildGangPhotoFrame();
     this.buildGreenDomeLamp();
-    this.buildAshtrayAndCigar();
-    this.buildTwinM1911Pistols();
     this.buildMapAndKeychain();
+    this.buildTwinM1911Pistols();
+    this.buildAshtrayAndCigar();
     this.buildRotaryTelephone();
-    this.buildSepiaGangPhoto();
 
     this.scene.add(this.root);
     this.loadConfiguredCustomModels();
   }
 
-  buildRoomAndDesk() {
-    // Warm muted plaster back wall (seen in 2.jpg behind the green dome lamp)
+  /**
+   * 1. Room Floor, Back Plaster Wall, Baseboard & Left Wall
+   */
+  buildRoomArchitecture() {
+    // Hardwood plank floor
+    const floorMat = new THREE.MeshStandardMaterial({
+      map: this.floorTex,
+      roughness: 0.68,
+      metalness: 0.05
+    });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    this.root.add(floor);
+
+    // Back olive-grey plaster wall (angled slightly or flush behind the desk)
     const wallMat = new THREE.MeshStandardMaterial({
-      color: 0x6e6552,
+      map: this.wallTex,
       roughness: 0.92
     });
-    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 6), wallMat);
-    backWall.position.set(0, 2.5, -0.95);
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5.5), wallMat);
+    backWall.position.set(0, 2.75, -0.68);
     backWall.receiveShadow = true;
     this.root.add(backWall);
 
-    // Honey-oak tabletop matching the exact golden-brown wood in maxres.jpg
-    const deskMat = new THREE.MeshStandardMaterial({
-      map: this.woodTex,
-      roughness: 0.46,
-      metalness: 0.06
+    // Distressed mottled baseboard trim along bottom of back wall
+    const baseboardMat = new THREE.MeshStandardMaterial({
+      map: this.ashtrayTex,
+      color: 0x6e5236,
+      roughness: 0.78
     });
+    const baseboard = new THREE.Mesh(new THREE.BoxGeometry(10, 0.16, 0.03), baseboardMat);
+    baseboard.position.set(0, 0.08, -0.665);
+    baseboard.receiveShadow = true;
+    this.root.add(baseboard);
 
-    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 2.1), deskMat);
-    deskTop.position.set(0, 0.74, 0);
-    deskTop.castShadow = true;
-    deskTop.receiveShadow = true;
-    this.root.add(deskTop);
-
-    // Front/side dark wood skirt
-    const baseMat = new THREE.MeshStandardMaterial({
-      color: 0x3d200e,
-      roughness: 0.65
-    });
-    const deskBase = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.68, 1.9), baseMat);
-    deskBase.position.set(0, 0.34, 0);
-    deskBase.receiveShadow = true;
-    this.root.add(deskBase);
+    // Left wall behind the bookcase
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5.5), wallMat);
+    leftWall.rotation.y = Math.PI / 2;
+    leftWall.position.set(-1.95, 2.75, 0);
+    leftWall.receiveShadow = true;
+    this.root.add(leftWall);
   }
 
   /**
-   * Green Mushroom-Dome Lamp with Mottled Turquoise Ceramic Base (seen in 2.jpg & top of maxres.jpg)
+   * 2. Vintage Pin-Up Posters & B&W Car Photo on the Back Wall (matching screenshot top)
    */
-  buildGreenDomeLamp() {
-    const group = new THREE.Group();
-    group.name = 'prop_lamp';
-    group.position.set(-0.26, 0.8, -0.46);
+  buildWallPosters() {
+    const posterSpecs = [
+      { x: -0.62, y: 1.72, w: 0.34, h: 0.44, rot: 0.01, variant: 0 },
+      { x: -0.08, y: 1.68, w: 0.32, h: 0.44, rot: -0.01, variant: 1 },
+      { x: 0.44, y: 1.74, w: 0.26, h: 0.42, rot: 0.02, variant: 2 },
+      { x: 1.08, y: 1.56, w: 0.34, h: 0.28, rot: -0.02, variant: 3 } // White-bordered B&W car photo on right
+    ];
 
-    // Mottled turquoise-green ceramic base
-    const baseMat = new THREE.MeshStandardMaterial({
-      map: this.ceramicTex,
-      roughness: 0.32,
-      metalness: 0.12
+    posterSpecs.forEach((p) => {
+      const mat = new THREE.MeshStandardMaterial({
+        map: createWallPosterTexture(p.variant),
+        roughness: 0.75
+      });
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), mat);
+      mesh.position.set(p.x, p.y, -0.662);
+      mesh.rotation.z = p.rot;
+      this.root.add(mesh);
     });
-    const base = new THREE.Mesh(new THREE.SphereGeometry(0.19, 28, 20), baseMat);
-    base.scale.set(1.0, 0.62, 1.0);
-    base.position.y = 0.09;
-    base.castShadow = true;
-    base.receiveShadow = true;
-    group.add(base);
+  }
 
-    // Brass neck & finial
+  /**
+   * 3. Left Bookcase / Glass Cabinet, Gold Trophy on Plinth & Cardboard Box on Floor
+   */
+  buildLeftCabinetAndCardboardBox() {
+    const woodMat = new THREE.MeshStandardMaterial({
+      map: this.woodTex,
+      roughness: 0.48
+    });
+
+    // Lower wooden side cabinet on the left wall
+    const sideCounter = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.05, 1.6), woodMat);
+    sideCounter.position.set(-1.62, 0.525, 0.35);
+    sideCounter.castShadow = true;
+    sideCounter.receiveShadow = true;
+    this.root.add(sideCounter);
+
+    // Tall glass-door bookcase in the foreground-left corner
+    const bookcase = new THREE.Mesh(new THREE.BoxGeometry(0.55, 2.1, 1.05), woodMat);
+    bookcase.position.set(-1.68, 1.05, 1.38);
+    bookcase.castShadow = true;
+    this.root.add(bookcase);
+
+    // Frosted greenish glass pane in the bookcase door
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x8ca69e,
+      roughness: 0.15,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.55
+    });
+    const glassPane = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 1.65), glassMat);
+    glassPane.rotation.y = Math.PI / 2;
+    glassPane.position.set(-1.39, 1.1, 1.38);
+    this.root.add(glassPane);
+
+    // Red mahogany trophy plinth on the left cabinet top + Gold Trophy Goblet
+    const plinthMat = new THREE.MeshStandardMaterial({
+      color: 0x6b2314,
+      roughness: 0.4
+    });
+    const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.16, 0.18), plinthMat);
+    plinth.position.set(-1.52, 1.13, -0.18);
+    plinth.castShadow = true;
+    this.root.add(plinth);
+
+    // Load photorealistic brass goblet for the trophy cup
+    this.gltfLoader.load('/models/brass_goblets/brass_goblets.gltf', (gltf) => {
+      const goblet = gltf.scene.getObjectByName('brass_goblet_01') || gltf.scene.children[0];
+      if (goblet) {
+        const clone = goblet.clone();
+        clone.position.set(-1.52, 1.21, -0.18);
+        clone.scale.setScalar(1.45);
+        clone.traverse((c) => {
+          if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true;
+          }
+        });
+        this.root.add(clone);
+      }
+    });
+
+    // Printed Cardboard Box on the floor in the bottom-left corner ("PICK UP / PLEASE HANDLE")
+    const cardBoxMat = new THREE.MeshStandardMaterial({
+      map: this.boxTex,
+      roughness: 0.85
+    });
+    const cardBox = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.34, 0.38), cardBoxMat);
+    cardBox.position.set(-1.18, 0.17, 0.78);
+    cardBox.rotation.y = 0.42;
+    cardBox.castShadow = true;
+    cardBox.receiveShadow = true;
+    this.root.add(cardBox);
+  }
+
+  /**
+   * 4. Honey-Oak Executive Desk (Solid Left Side Panel + Right Square Legs, matching screenshot)
+   */
+  buildDesk() {
+    const deskGroup = new THREE.Group();
+
+    const deskWoodMat = new THREE.MeshStandardMaterial({
+      map: this.woodTex,
+      roughness: 0.42,
+      metalness: 0.05
+    });
+
+    // Main honey-oak tabletop slab (width 2.25, depth 1.05, height 0.78)
+    const topSlab = new THREE.Mesh(new THREE.BoxGeometry(2.26, 0.055, 1.06), deskWoodMat);
+    topSlab.position.set(0, 0.78, -0.12);
+    topSlab.castShadow = true;
+    topSlab.receiveShadow = true;
+    deskGroup.add(topSlab);
+
+    // Front apron beam under desktop
+    const frontApron = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.085, 0.04), deskWoodMat);
+    frontApron.position.set(0, 0.715, 0.36);
+    frontApron.castShadow = true;
+    deskGroup.add(frontApron);
+
+    // Solid wooden side panel on the left side of the desk (visible behind the chair in screenshot)
+    const leftPanel = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.76, 0.98), deskWoodMat);
+    leftPanel.position.set(-1.05, 0.38, -0.12);
+    leftPanel.castShadow = true;
+    leftPanel.receiveShadow = true;
+    deskGroup.add(leftPanel);
+
+    // Back modesty panel
+    const backPanel = new THREE.Mesh(new THREE.BoxGeometry(2.12, 0.52, 0.04), deskWoodMat);
+    backPanel.position.set(0, 0.49, -0.58);
+    backPanel.receiveShadow = true;
+    deskGroup.add(backPanel);
+
+    // Right front & right back square-tapered wooden legs
+    const legGeo = new THREE.BoxGeometry(0.075, 0.76, 0.075);
+    const rightFrontLeg = new THREE.Mesh(legGeo, deskWoodMat);
+    rightFrontLeg.position.set(1.04, 0.38, 0.35);
+    rightFrontLeg.castShadow = true;
+    rightFrontLeg.receiveShadow = true;
+    deskGroup.add(rightFrontLeg);
+
+    const rightBackLeg = new THREE.Mesh(legGeo, deskWoodMat);
+    rightBackLeg.position.set(1.04, 0.38, -0.58);
+    rightBackLeg.castShadow = true;
+    rightBackLeg.receiveShadow = true;
+    deskGroup.add(rightBackLeg);
+
+    // Side rail connecting the two right legs
+    const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.085, 0.94), deskWoodMat);
+    rightRail.position.set(1.04, 0.715, -0.12);
+    deskGroup.add(rightRail);
+
+    this.root.add(deskGroup);
+  }
+
+  /**
+   * 5. Pulled-Out Wooden Office Chair with Burnt-Orange/Red Cushion in Foreground
+   */
+  buildDeskChair() {
+    const chair = new THREE.Group();
+    chair.position.set(-0.22, 0.0, 0.62);
+    chair.rotation.y = 0.65; // Angled toward the desk just like in the screenshot
+
+    const darkWoodMat = new THREE.MeshStandardMaterial({
+      map: this.woodTex,
+      color: 0x6e3b19,
+      roughness: 0.46
+    });
+
+    const cushionMat = new THREE.MeshStandardMaterial({
+      map: this.cushionTex,
+      roughness: 0.68
+    });
+
+    // Rounded wooden seat frame
+    const seatFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.48, 0.04, 0.48),
+      darkWoodMat
+    );
+    seatFrame.position.y = 0.44;
+    seatFrame.castShadow = true;
+    seatFrame.receiveShadow = true;
+    chair.add(seatFrame);
+
+    // Plush red-orange upholstered seat pad with beveled top
+    const cushion = new THREE.Mesh(
+      new THREE.BoxGeometry(0.45, 0.042, 0.45),
+      cushionMat
+    );
+    cushion.position.y = 0.47;
+    cushion.castShadow = true;
+    cushion.receiveShadow = true;
+    chair.add(cushion);
+
+    // 4 Cylindrical/tapered wooden chair legs
+    const legCoords = [
+      [-0.2, -0.2],
+      [0.2, -0.2],
+      [-0.2, 0.2],
+      [0.2, 0.2]
+    ];
+    legCoords.forEach(([lx, lz]) => {
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.022, 0.016, 0.44, 14),
+        darkWoodMat
+      );
+      leg.position.set(lx, 0.22, lz);
+      leg.castShadow = true;
+      chair.add(leg);
+    });
+
+    // Curved backrest posts & horizontal slats
+    [-0.2, 0.2].forEach((bx) => {
+      const post = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.022, 0.46, 14),
+        darkWoodMat
+      );
+      post.position.set(bx, 0.66, -0.21);
+      post.rotation.x = -0.12;
+      post.castShadow = true;
+      chair.add(post);
+    });
+
+    // Top curved backrest bar & middle slat
+    const topBar = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.065, 0.028), darkWoodMat);
+    topBar.position.set(0, 0.85, -0.235);
+    topBar.castShadow = true;
+    chair.add(topBar);
+
+    const midBar = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.038, 0.022), darkWoodMat);
+    midBar.position.set(0, 0.66, -0.215);
+    midBar.castShadow = true;
+    chair.add(midBar);
+
+    this.root.add(chair);
+  }
+
+  /**
+   * 6. Round Slatted Wire/Wicker Wastebasket on the Floor to the Right of the Desk
+   */
+  buildWastebasket() {
+    const binGroup = new THREE.Group();
+    binGroup.position.set(1.38, 0.0, 0.22);
+
+    const rimMat = new THREE.MeshStandardMaterial({
+      color: 0x5c4a35,
+      roughness: 0.6,
+      metalness: 0.3
+    });
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x1e1d1b,
+      roughness: 0.7
+    });
+
+    // Heavy dark bottom ring
+    const bottomBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.185, 0.185, 0.06, 28),
+      baseMat
+    );
+    bottomBase.position.y = 0.03;
+    bottomBase.castShadow = true;
+    binGroup.add(bottomBase);
+
+    // Top open rim ring
+    const topRim = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.012, 12, 32), rimMat);
+    topRim.rotation.x = Math.PI / 2;
+    topRim.position.y = 0.44;
+    binGroup.add(topRim);
+
+    // Middle reinforcement ring
+    const midRim = new THREE.Mesh(new THREE.TorusGeometry(0.195, 0.007, 10, 28), rimMat);
+    midRim.rotation.x = Math.PI / 2;
+    midRim.position.y = 0.24;
+    binGroup.add(midRim);
+
+    // 28 Vertical wire/wicker ribs around the cylinder
+    const numRibs = 28;
+    for (let i = 0; i < numRibs; i++) {
+      const angle = (i / numRibs) * Math.PI * 2;
+      const rib = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.006, 0.006, 0.4, 8),
+        rimMat
+      );
+      rib.position.set(Math.cos(angle) * 0.192, 0.24, Math.sin(angle) * 0.192);
+      rib.rotation.z = -Math.cos(angle) * 0.045;
+      rib.rotation.x = Math.sin(angle) * 0.045;
+      rib.castShadow = true;
+      binGroup.add(rib);
+    }
+
+    this.root.add(binGroup);
+  }
+
+  /**
+   * 7. Detailed 1930s Vintage Typewriter & Pencil Cup (Left-Back of Desk)
+   */
+  buildTypewriterAndPencilCup() {
+    const group = new THREE.Group();
+    group.name = 'prop_typewriter';
+    group.position.set(-0.56, 0.808, -0.25);
+    group.rotation.y = 0.18; // Angled slightly toward center-front like in the screenshot
+
+    const ironMat = new THREE.MeshStandardMaterial({
+      color: 0x262423,
+      roughness: 0.36,
+      metalness: 0.65
+    });
+    const darkTrimMat = new THREE.MeshStandardMaterial({
+      color: 0x151413,
+      roughness: 0.5,
+      metalness: 0.4
+    });
     const brassMat = new THREE.MeshStandardMaterial({
-      color: 0xb89242,
-      roughness: 0.3,
+      color: 0xc49c48,
+      roughness: 0.28,
       metalness: 0.85
     });
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.035, 0.24, 16), brassMat);
-    stem.position.y = 0.22;
-    group.add(stem);
-
-    // Iconic dark forest-green mushroom dome shade
-    const domeMat = new THREE.MeshStandardMaterial({
-      color: 0x1e3828,
-      roughness: 0.45,
-      metalness: 0.15,
-      side: THREE.DoubleSide
+    const silverMat = new THREE.MeshStandardMaterial({
+      color: 0xc8c4bc,
+      roughness: 0.22,
+      metalness: 0.88
     });
-    const dome = new THREE.Mesh(
-      new THREE.SphereGeometry(0.32, 32, 20, 0, Math.PI * 2, 0, Math.PI * 0.54),
-      domeMat
+
+    // Lower chassis frame
+    const lowerChassis = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.08, 0.34), ironMat);
+    lowerChassis.position.set(0, 0.04, 0.02);
+    lowerChassis.castShadow = true;
+    lowerChassis.receiveShadow = true;
+    group.add(lowerChassis);
+
+    // Upper rear body housing
+    const upperBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.11, 0.2), ironMat);
+    upperBody.position.set(0, 0.125, -0.04);
+    upperBody.castShadow = true;
+    group.add(upperBody);
+
+    // Two iconic exposed round ribbon spools on top of the typewriter (clearly visible in screenshot!)
+    [-0.115, 0.115].forEach((sx) => {
+      const spoolWell = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.052, 0.052, 0.018, 24),
+        darkTrimMat
+      );
+      spoolWell.position.set(sx, 0.182, -0.02);
+      group.add(spoolWell);
+
+      const spoolFlange = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.044, 0.044, 0.022, 24),
+        brassMat
+      );
+      spoolFlange.position.set(sx, 0.186, -0.02);
+      group.add(spoolFlange);
+
+      const spoolCore = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.014, 0.014, 0.026, 16),
+        silverMat
+      );
+      spoolCore.position.set(sx, 0.188, -0.02);
+      group.add(spoolCore);
+    });
+
+    // Rubber platen roller & carriage assembly across the top-back
+    const platen = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.026, 0.026, 0.44, 24),
+      darkTrimMat
     );
-    dome.scale.set(1.05, 0.88, 1.05);
-    dome.position.y = 0.22;
-    dome.castShadow = true;
-    group.add(dome);
+    platen.rotation.z = Math.PI / 2;
+    platen.position.set(0, 0.21, -0.11);
+    platen.castShadow = true;
+    group.add(platen);
 
-    // Top finial cap
-    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 12), brassMat);
-    finial.position.y = 0.51;
-    group.add(finial);
+    // Platen knobs on both ends
+    [-0.24, 0.24].forEach((kx) => {
+      const knob = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.022, 0.022, 0.03, 18),
+        darkTrimMat
+      );
+      knob.rotation.z = Math.PI / 2;
+      knob.position.set(kx, 0.21, -0.11);
+      group.add(knob);
+    });
 
-    // Warm inner glow under the dome
-    const innerGlowMat = new THREE.MeshBasicMaterial({ color: 0xffd280 });
-    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), innerGlowMat);
-    bulb.position.y = 0.26;
-    group.add(bulb);
+    // Angled paper guide plate behind the platen
+    const paperGuide = new THREE.Mesh(
+      new THREE.BoxGeometry(0.36, 0.09, 0.008),
+      ironMat
+    );
+    paperGuide.position.set(0, 0.25, -0.145);
+    paperGuide.rotation.x = -0.35;
+    group.add(paperGuide);
+
+    // Chrome carriage return lever on the left
+    const lever = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.1, 10), silverMat);
+    lever.position.set(-0.2, 0.24, -0.08);
+    lever.rotation.x = 0.6;
+    group.add(lever);
+
+    // Sloped keyboard recess + 4 staggered rows of round glass/silver typewriter keys!
+    const keyBed = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.02, 0.14), darkTrimMat);
+    keyBed.position.set(0, 0.085, 0.12);
+    keyBed.rotation.x = 0.38;
+    group.add(keyBed);
+
+    const keyCapMat = new THREE.MeshStandardMaterial({
+      color: 0xd8ceb8,
+      roughness: 0.3
+    });
+
+    for (let row = 0; row < 4; row++) {
+      const numKeys = 10 - (row % 2);
+      for (let col = 0; col < numKeys; col++) {
+        const kx = (col - (numKeys - 1) / 2) * 0.033;
+        const ky = 0.11 - row * 0.014;
+        const kz = 0.075 + row * 0.03;
+
+        const ring = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.012, 0.012, 0.008, 14),
+          silverMat
+        );
+        ring.position.set(kx, ky, kz);
+        group.add(ring);
+
+        const cap = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.009, 0.009, 0.01, 12),
+          keyCapMat
+        );
+        cap.position.set(kx, ky + 0.001, kz);
+        group.add(cap);
+      }
+    }
+
+    // Spacebar at bottom of keyboard
+    const spacebar = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.012, 0.022), darkTrimMat);
+    spacebar.position.set(0, 0.055, 0.195);
+    group.add(spacebar);
+
+    // White ceramic cup with pencils/pens to the left of the typewriter
+    const cupMat = new THREE.MeshStandardMaterial({
+      color: 0xcfc9bc,
+      roughness: 0.35
+    });
+    const cup = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.042, 0.036, 0.11, 20),
+      cupMat
+    );
+    cup.position.set(-0.34, 0.055, -0.02);
+    cup.castShadow = true;
+    group.add(cup);
+
+    // Pencils sticking out of the cup
+    const pencilColors = [0xb8862d, 0x8f2418, 0x2b4c3f, 0xd4c29a];
+    pencilColors.forEach((col, idx) => {
+      const pMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.6 });
+      const pencil = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.004, 0.004, 0.16, 8),
+        pMat
+      );
+      pencil.position.set(
+        -0.34 + (idx - 1.5) * 0.012,
+        0.1,
+        -0.02 + ((idx % 2) - 0.5) * 0.014
+      );
+      pencil.rotation.z = (idx - 1.5) * 0.08;
+      pencil.rotation.x = ((idx % 2) - 0.5) * 0.1;
+      group.add(pencil);
+    });
 
     this.root.add(group);
   }
 
   /**
-   * Round Mottled Stone Ashtray & Thick Brown Cigar (right side of maxres.jpg)
+   * 8. Photorealistic Vintage Pocket Watch (`vintage_pocket_watch.gltf`) & Pen (Left-Front of Desk)
+   */
+  buildPocketWatchAndPen() {
+    this.gltfLoader.load('/models/vintage_pocket_watch/vintage_pocket_watch.gltf', (gltf) => {
+      const watch = gltf.scene;
+      const box = new THREE.Box3().setFromObject(watch);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const targetSize = 0.095;
+      watch.scale.setScalar(targetSize / maxDim);
+
+      watch.position.set(-0.74, 0.812, 0.06);
+      watch.rotation.y = 0.45;
+      watch.traverse((c) => {
+        if (c.isMesh) {
+          c.castShadow = true;
+          c.receiveShadow = true;
+        }
+      });
+      this.root.add(watch);
+    });
+  }
+
+  /**
+   * 9. Photorealistic Framed Sepia Gang Photograph (`standing_picture_frame_01.gltf`, Center-Back)
+   */
+  buildGangPhotoFrame() {
+    const group = new THREE.Group();
+    group.name = 'prop_operations';
+    group.position.set(-0.1, 0.808, -0.32);
+    group.rotation.y = -0.25;
+
+    // Fallback frame until GLTF finishes loading in a few ms
+    const frameMat = new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.55 });
+    const photoMat = new THREE.MeshStandardMaterial({ map: this.photoTex, roughness: 0.5 });
+
+    const border = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.018), frameMat);
+    border.position.y = 0.12;
+    border.rotation.x = -0.18;
+    border.castShadow = true;
+    group.add(border);
+
+    const pic = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.2), photoMat);
+    pic.position.set(0, 0.12, 0.011);
+    pic.rotation.x = -0.18;
+    group.add(pic);
+
+    this.registerInteractiveGroup('prop_operations', group);
+  }
+
+  /**
+   * 10. Sculpted Green Mushroom-Dome Lamp with Turquoise Ceramic Base (Center-Right of Desk)
+   */
+  buildGreenDomeLamp() {
+    const group = new THREE.Group();
+    group.name = 'prop_lamp';
+    group.position.set(0.24, 0.808, -0.22);
+
+    // Sculpted bulbous ceramic base using 32-segment LatheGeometry
+    const basePoints = [
+      new THREE.Vector2(0.0, 0.0),
+      new THREE.Vector2(0.095, 0.0),
+      new THREE.Vector2(0.115, 0.025),
+      new THREE.Vector2(0.105, 0.055),
+      new THREE.Vector2(0.065, 0.08),
+      new THREE.Vector2(0.022, 0.09),
+      new THREE.Vector2(0.0, 0.09)
+    ];
+    const baseGeo = new THREE.LatheGeometry(basePoints, 36);
+    const baseMat = new THREE.MeshStandardMaterial({
+      map: this.ceramicTex,
+      roughness: 0.28,
+      metalness: 0.15
+    });
+    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    group.add(baseMesh);
+
+    // Curved brass arm rising from the ceramic base and arching over the shade
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0.08, 0),
+      new THREE.Vector3(0.04, 0.22, -0.02),
+      new THREE.Vector3(0.02, 0.36, 0.01),
+      new THREE.Vector3(-0.04, 0.39, 0.04)
+    ]);
+    const armGeo = new THREE.TubeGeometry(curve, 24, 0.011, 12, false);
+    const brassMat = new THREE.MeshStandardMaterial({
+      color: 0x9c824a,
+      roughness: 0.3,
+      metalness: 0.85
+    });
+    const armMesh = new THREE.Mesh(armGeo, brassMat);
+    armMesh.castShadow = true;
+    group.add(armMesh);
+
+    // Sculpted dark teal-green mushroom dome shade (matching the exact tilted dome in screenshot!)
+    const shadePoints = [
+      new THREE.Vector2(0.001, 0.16),
+      new THREE.Vector2(0.045, 0.155),
+      new THREE.Vector2(0.105, 0.125),
+      new THREE.Vector2(0.155, 0.065),
+      new THREE.Vector2(0.175, 0.0),
+      new THREE.Vector2(0.168, 0.004)
+    ];
+    const shadeGeo = new THREE.LatheGeometry(shadePoints, 40);
+    const shadeMat = new THREE.MeshStandardMaterial({
+      color: 0x203b31,
+      roughness: 0.38,
+      metalness: 0.22,
+      side: THREE.DoubleSide
+    });
+    const shadeGroup = new THREE.Group();
+    shadeGroup.position.set(-0.04, 0.22, 0.04);
+    shadeGroup.rotation.z = 0.14;
+    shadeGroup.rotation.x = 0.08;
+
+    const shadeMesh = new THREE.Mesh(shadeGeo, shadeMat);
+    shadeMesh.castShadow = true;
+    shadeGroup.add(shadeMesh);
+
+    // Warm glowing interior bulb
+    const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe099 });
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.038, 16, 16), bulbMat);
+    bulb.position.y = 0.08;
+    shadeGroup.add(bulb);
+
+    group.add(shadeGroup);
+    this.registerInteractiveGroup('prop_lamp', group);
+  }
+
+  /**
+   * 11. Folded Lost Heaven Map, Fountain Pen & Leather Keychain Fob (Center-Front of Desk)
+   */
+  buildMapAndKeychain() {
+    const group = new THREE.Group();
+    group.name = 'prop_dossier';
+
+    // Unfolded Lost Heaven Map angled slightly on center-left of desk (matching screenshot!)
+    const mapMat = new THREE.MeshStandardMaterial({
+      map: this.mapTex,
+      roughness: 0.82
+    });
+    const mapSheet = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.004, 0.38), mapMat);
+    mapSheet.position.set(-0.08, 0.81, 0.05);
+    mapSheet.rotation.y = -0.22;
+    mapSheet.receiveShadow = true;
+    group.add(mapSheet);
+
+    // Fountain pen lying at the left edge of the map (visible in screenshot!)
+    const penBodyMat = new THREE.MeshStandardMaterial({
+      color: 0x4a2010,
+      roughness: 0.3,
+      metalness: 0.4
+    });
+    const penTipMat = new THREE.MeshStandardMaterial({
+      color: 0xd4b872,
+      roughness: 0.25,
+      metalness: 0.85
+    });
+    const penGroup = new THREE.Group();
+    penGroup.position.set(-0.38, 0.814, 0.15);
+    penGroup.rotation.y = 0.12;
+
+    const penShaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.006, 0.004, 0.18, 12),
+      penBodyMat
+    );
+    penShaft.rotation.z = Math.PI / 2;
+    penShaft.castShadow = true;
+    penGroup.add(penShaft);
+
+    const penNib = new THREE.Mesh(
+      new THREE.ConeGeometry(0.005, 0.025, 10),
+      penTipMat
+    );
+    penNib.rotation.z = -Math.PI / 2;
+    penNib.position.x = 0.1;
+    penGroup.add(penNib);
+    group.add(penGroup);
+
+    // Leather Keychain Fob & Metal Key at the bottom-right corner of the map
+    const keyGroup = new THREE.Group();
+    keyGroup.position.set(0.22, 0.812, 0.14);
+    keyGroup.rotation.y = -0.32;
+
+    const leatherMat = new THREE.MeshStandardMaterial({
+      color: 0x7a4222,
+      roughness: 0.58
+    });
+    const fob = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.03, 0.006, 24), leatherMat);
+    fob.scale.set(1.0, 1.0, 1.32);
+    fob.castShadow = true;
+    keyGroup.add(fob);
+
+    const medallionMat = new THREE.MeshStandardMaterial({
+      map: this.medallionTex,
+      roughness: 0.38
+    });
+    const medallion = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.028, 0.028, 0.008, 24),
+      medallionMat
+    );
+    medallion.position.set(0, 0.001, -0.006);
+    keyGroup.add(medallion);
+
+    const silverMat = new THREE.MeshStandardMaterial({
+      color: 0xb8b2a6,
+      roughness: 0.25,
+      metalness: 0.88
+    });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.0025, 10, 24), silverMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(0.006, 0.003, 0.052);
+    keyGroup.add(ring);
+
+    const keyHead = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.018, 0.018, 0.005, 16),
+      silverMat
+    );
+    keyHead.position.set(0.014, 0.003, 0.078);
+    keyHead.castShadow = true;
+    keyGroup.add(keyHead);
+
+    const keyBlade = new THREE.Mesh(new THREE.BoxGeometry(0.009, 0.004, 0.065), silverMat);
+    keyBlade.position.set(0.022, 0.003, 0.115);
+    keyBlade.rotation.y = 0.22;
+    keyBlade.castShadow = true;
+    keyGroup.add(keyBlade);
+
+    group.add(keyGroup);
+    this.registerInteractiveGroup('prop_dossier', group);
+  }
+
+  /**
+   * 12. TWO Photorealistic Colt M1911 Pistols (`service_pistol.gltf` from Poly Haven!)
+   *     + Standing .45 ACP Bullet Cartridge on the Map
+   */
+  buildTwinM1911Pistols() {
+    const group = new THREE.Group();
+    group.name = 'prop_arsenal';
+    this.registerInteractiveGroup('prop_arsenal', group);
+
+    this.gltfLoader.load('/models/service_pistol/service_pistol.gltf', (gltf) => {
+      // Assemble Pistol A from its nodes (`service_pistol_pistol_a`, `slide_a`, `hammer_a`, `trigger_a`)
+      const pistolTemplate = new THREE.Group();
+      const partNames = [
+        'service_pistol_pistol_a',
+        'service_pistol_slide_a',
+        'service_pistol_hammer_a',
+        'service_pistol_trigger_a'
+      ];
+      partNames.forEach((name) => {
+        const node = gltf.scene.getObjectByName(name);
+        if (node) {
+          pistolTemplate.add(node.clone());
+        }
+      });
+
+      // Compute exact bounding box of the assembled M1911 so it scales & sits flush on the desk
+      const box = new THREE.Box3().setFromObject(pistolTemplate);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const maxDim = Math.max(size.x, size.y, size.z) || 0.22;
+      const scale = 0.26 / maxDim; // Realistic M1911 length on the desk
+
+      // Pistol 1 (Upper-Left of pair, pointing toward upper-right like in the screenshot & video!)
+      const pistol1 = pistolTemplate.clone();
+      pistol1.scale.setScalar(scale);
+      pistol1.rotation.order = 'YXZ';
+      pistol1.rotation.x = -Math.PI / 2;
+      pistol1.rotation.y = 0.42;
+      pistol1.position.set(0.38, 0.822, 0.06);
+      group.add(pistol1);
+
+      // Pistol 2 (Lower-Right foreground of pair, pointing up/left beside the ashtray!)
+      const pistol2 = pistolTemplate.clone();
+      pistol2.scale.setScalar(scale);
+      pistol2.rotation.order = 'YXZ';
+      pistol2.rotation.x = -Math.PI / 2;
+      pistol2.rotation.y = 1.68;
+      pistol2.position.set(0.49, 0.822, 0.27);
+      group.add(pistol2);
+
+      // Standing .45 ACP Bullet Cartridge on the Lost Heaven Map (visible in the screenshot!)
+      const bulletNode = gltf.scene.getObjectByName('service_pistol_bullet');
+      if (bulletNode) {
+        const bullet = bulletNode.clone();
+        bullet.scale.setScalar(scale * 1.15);
+        bullet.position.set(-0.08, 0.814, -0.02);
+        group.add(bullet);
+      }
+
+      // Register all meshes for hover highlight & click raycasting
+      group.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          child.userData.interactiveParent = 'prop_arsenal';
+        }
+      });
+    });
+  }
+
+  /**
+   * 13. Sculpted Round Mottled Stone Ashtray (`LatheGeometry`) & Cigar (Right of Pistols)
    */
   buildAshtrayAndCigar() {
     const group = new THREE.Group();
     group.name = 'prop_ashtray';
-    group.position.set(0.56, 0.8, 0.12);
+    group.position.set(0.76, 0.808, 0.14);
 
+    // Sculpted ashtray cross-section (flat bottom, rounded outer wall, wide rim, deep inner bowl)
+    const ashProfile = [
+      new THREE.Vector2(0.0, 0.0),
+      new THREE.Vector2(0.11, 0.0),
+      new THREE.Vector2(0.125, 0.02),
+      new THREE.Vector2(0.122, 0.045),
+      new THREE.Vector2(0.082, 0.046),
+      new THREE.Vector2(0.072, 0.018),
+      new THREE.Vector2(0.0, 0.016)
+    ];
+    const ashGeo = new THREE.LatheGeometry(ashProfile, 40);
     const stoneMat = new THREE.MeshStandardMaterial({
       map: this.ashtrayTex,
-      roughness: 0.38,
+      roughness: 0.35,
       metalness: 0.08
     });
+    const ashtray = new THREE.Mesh(ashGeo, stoneMat);
+    ashtray.castShadow = true;
+    ashtray.receiveShadow = true;
+    group.add(ashtray);
 
-    // Outer thick cylinder rim of ashtray
-    const outerRim = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.24, 0.22, 0.075, 36),
-      stoneMat
-    );
-    outerRim.position.y = 0.0375;
-    outerRim.castShadow = true;
-    outerRim.receiveShadow = true;
-    group.add(outerRim);
-
-    // Recessed dark inner bowl
-    const bowlMat = new THREE.MeshStandardMaterial({
-      map: this.ashtrayTex,
-      color: 0x665844,
-      roughness: 0.55
-    });
-    const innerBowl = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.145, 0.11, 0.02, 28),
-      bowlMat
-    );
-    innerBowl.position.y = 0.068;
-    group.add(innerBowl);
-
-    // Thick brown cigar resting diagonally from bottom-left rim toward upper-right bowl
+    // Hand-rolled brown cigar resting across the rim
     const cigarGroup = new THREE.Group();
-    cigarGroup.position.set(-0.03, 0.085, 0.04);
-    cigarGroup.rotation.y = -1.15; // Pointing towards upper-right like in maxres.jpg
+    cigarGroup.position.set(-0.02, 0.048, 0.02);
+    cigarGroup.rotation.y = -1.1;
 
     const tobaccoMat = new THREE.MeshStandardMaterial({
       color: 0x4b2c16,
-      roughness: 0.72
+      roughness: 0.7
     });
     const cigarBody = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.021, 0.019, 0.31, 18),
+      new THREE.CylinderGeometry(0.012, 0.011, 0.18, 18),
       tobaccoMat
     );
     cigarBody.rotation.z = Math.PI / 2 - 0.08;
     cigarBody.castShadow = true;
     cigarGroup.add(cigarBody);
 
-    // White/grey layered ash tip at the upper-right end of the cigar
     const ashMat = new THREE.MeshStandardMaterial({
-      color: 0x9fa39e,
+      color: 0xa6aaa4,
       roughness: 0.9
     });
     const ashTip = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.019, 0.021, 0.045, 16),
+      new THREE.CylinderGeometry(0.011, 0.012, 0.026, 16),
       ashMat
     );
     ashTip.rotation.z = Math.PI / 2 - 0.08;
-    ashTip.position.set(-0.165, 0.013, 0);
+    ashTip.position.set(-0.095, 0.008, 0);
     cigarGroup.add(ashTip);
 
-    // Subtle glowing ember core inside the ash
-    const emberMat = new THREE.MeshBasicMaterial({ color: 0xd94e1f });
-    const ember = new THREE.Mesh(new THREE.SphereGeometry(0.015, 12, 12), emberMat);
-    ember.position.set(-0.182, 0.014, 0);
+    const emberMat = new THREE.MeshBasicMaterial({ color: 0xe04e1a });
+    const ember = new THREE.Mesh(new THREE.SphereGeometry(0.009, 12, 12), emberMat);
+    ember.position.set(-0.106, 0.009, 0);
     cigarGroup.add(ember);
 
     group.add(cigarGroup);
 
-    this.smokeOrigin = new THREE.Vector3(0.59, 0.91, 0.02);
+    this.smokeOrigin = new THREE.Vector3(0.78, 0.87, 0.09);
     this.root.add(group);
   }
 
   /**
-   * Builds a detailed Colt M1911 Semi-Automatic Pistol matching maxres.jpg
-   */
-  createM1911Mesh() {
-    const gun = new THREE.Group();
-
-    // Worn bronze-gunmetal steel material (matching the warm reflection in maxres.jpg)
-    const slideMat = new THREE.MeshStandardMaterial({
-      color: 0x544537,
-      roughness: 0.34,
-      metalness: 0.78
-    });
-
-    const frameMat = new THREE.MeshStandardMaterial({
-      color: 0x3d332a,
-      roughness: 0.4,
-      metalness: 0.72
-    });
-
-    const silverSteelMat = new THREE.MeshStandardMaterial({
-      color: 0x999288,
-      roughness: 0.25,
-      metalness: 0.88
-    });
-
-    const gripMat = new THREE.MeshStandardMaterial({
-      map: this.gripTex,
-      roughness: 0.62,
-      metalness: 0.05
-    });
-
-    // 1. Upper Slide (long rectangular top with rounded top bevel)
-    const slide = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.052, 0.038), slideMat);
-    slide.position.set(0.06, 0.062, 0);
-    slide.castShadow = true;
-    slide.receiveShadow = true;
-    gun.add(slide);
-
-    const slideTop = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.019, 0.019, 0.368, 14),
-      slideMat
-    );
-    slideTop.rotation.z = Math.PI / 2;
-    slideTop.position.set(0.06, 0.088, 0);
-    gun.add(slideTop);
-
-    // Rear slide serrations
-    for (let i = 0; i < 8; i++) {
-      const groove = new THREE.Mesh(
-        new THREE.BoxGeometry(0.005, 0.044, 0.041),
-        frameMat
-      );
-      groove.position.set(-0.095 + i * 0.009, 0.062, 0);
-      gun.add(groove);
-    }
-
-    // 2. Silver Ejection Port / Barrel Hood
-    const ejectionPort = new THREE.Mesh(
-      new THREE.BoxGeometry(0.068, 0.028, 0.04),
-      silverSteelMat
-    );
-    ejectionPort.position.set(0.015, 0.074, 0.002);
-    gun.add(ejectionPort);
-
-    // Barrel muzzle & recoil spring plug at the front
-    const muzzle = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.011, 0.011, 0.025, 14),
-      silverSteelMat
-    );
-    muzzle.rotation.z = Math.PI / 2;
-    muzzle.position.set(0.25, 0.072, 0);
-    gun.add(muzzle);
-
-    const recoilPlug = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.01, 0.01, 0.02, 12),
-      frameMat
-    );
-    recoilPlug.rotation.z = Math.PI / 2;
-    recoilPlug.position.set(0.246, 0.048, 0);
-    gun.add(recoilPlug);
-
-    // Front & rear sights
-    const frontSight = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.012, 0.008), frameMat);
-    frontSight.position.set(0.228, 0.106, 0);
-    gun.add(frontSight);
-
-    const rearSight = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.014, 0.022), frameMat);
-    rearSight.position.set(-0.105, 0.106, 0);
-    gun.add(rearSight);
-
-    // 3. Lower Receiver / Dust Cover Frame
-    const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.028, 0.034), frameMat);
-    receiver.position.set(0.01, 0.028, 0);
-    receiver.castShadow = true;
-    gun.add(receiver);
-
-    // 4. Angled Grip Frame & Checkered Walnut Grip Panels
-    const gripGroup = new THREE.Group();
-    gripGroup.position.set(-0.072, -0.048, 0);
-    gripGroup.rotation.z = -0.28; // Classic M1911 grip angle
-
-    const gripFrame = new THREE.Mesh(new THREE.BoxGeometry(0.078, 0.185, 0.034), frameMat);
-    gripFrame.castShadow = true;
-    gripGroup.add(gripFrame);
-
-    // Checkered walnut side panels
-    const gripPanels = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.162, 0.042), gripMat);
-    gripPanels.castShadow = true;
-    gripGroup.add(gripPanels);
-
-    // Magazine baseplate lip at the bottom of the grip
-    const magBase = new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.016, 0.036), frameMat);
-    magBase.position.set(0.004, -0.098, 0);
-    gripGroup.add(magBase);
-
-    // Beavertail grip safety tang at top-rear of grip
-    const beavertail = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.022, 0.028), frameMat);
-    beavertail.position.set(-0.036, 0.088, 0);
-    beavertail.rotation.z = 0.35;
-    gripGroup.add(beavertail);
-
-    gun.add(gripGroup);
-
-    // 5. Trigger Guard & Curved Trigger
-    const guardBottom = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.01, 0.024), frameMat);
-    guardBottom.position.set(0.002, -0.022, 0);
-    gun.add(guardBottom);
-
-    const guardFront = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.042, 0.024), frameMat);
-    guardFront.position.set(0.036, -0.004, 0);
-    guardFront.rotation.z = -0.18;
-    gun.add(guardFront);
-
-    const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.032, 0.016), silverSteelMat);
-    trigger.position.set(0.0, 0.0, 0);
-    trigger.rotation.z = 0.2;
-    gun.add(trigger);
-
-    // 6. Spurred Hammer at Rear of Slide
-    const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.028, 0.014), silverSteelMat);
-    hammer.position.set(-0.125, 0.065, 0);
-    hammer.rotation.z = 0.45;
-    gun.add(hammer);
-
-    return gun;
-  }
-
-  /**
-   * Places the TWO Colt M1911 Pistols right in the center/foreground of the table
-   * in the exact layout of maxres.jpg!
-   */
-  buildTwinM1911Pistols() {
-    const group = new THREE.Group();
-    group.name = 'prop_arsenal';
-
-    // Pistol 1 (Upper-Left of center, pointing upper-right toward the telephone/ashtray)
-    const pistol1 = this.createM1911Mesh();
-    pistol1.scale.setScalar(1.38);
-    // Lay flat on its side on the table surface (y = 0.828)
-    pistol1.rotation.order = 'YXZ';
-    pistol1.rotation.x = -Math.PI / 2;
-    pistol1.rotation.y = 0.48;
-    pistol1.position.set(-0.08, 0.83, 0.02);
-    group.add(pistol1);
-
-    // Pistol 2 (Lower-Right foreground, pointing up/slightly left beside the ashtray)
-    const pistol2 = this.createM1911Mesh();
-    pistol2.scale.setScalar(1.38);
-    pistol2.rotation.order = 'YXZ';
-    pistol2.rotation.x = -Math.PI / 2;
-    pistol2.rotation.y = 1.72;
-    pistol2.position.set(0.18, 0.83, 0.38);
-    group.add(pistol2);
-
-    this.registerInteractiveGroup('prop_arsenal', group);
-  }
-
-  /**
-   * Folded Lost Heaven City Map + Leather Keychain Fob & Key (left/bottom-left of maxres.jpg & 3.jpg)
-   */
-  buildMapAndKeychain() {
-    const group = new THREE.Group();
-    group.name = 'prop_dossier';
-
-    // 1. Folded Lost Heaven City Map on the left side of the table
-    const mapMat = new THREE.MeshStandardMaterial({
-      map: this.mapTex,
-      roughness: 0.82
-    });
-    const mapSheet = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.008, 0.56), mapMat);
-    mapSheet.position.set(-0.78, 0.805, 0.14);
-    mapSheet.rotation.y = 0.12;
-    mapSheet.receiveShadow = true;
-    group.add(mapSheet);
-
-    // 2. Leather Keychain Fob & Notched Key (bottom-left of maxres.jpg, next to map)
-    const keyGroup = new THREE.Group();
-    keyGroup.position.set(-0.43, 0.808, 0.28);
-    keyGroup.rotation.y = -0.35;
-
-    const leatherMat = new THREE.MeshStandardMaterial({
-      color: 0x7a4222,
-      roughness: 0.62
-    });
-    const fob = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.055, 0.01, 24), leatherMat);
-    fob.scale.set(1.0, 1.0, 1.32);
-    fob.castShadow = true;
-    keyGroup.add(fob);
-
-    // Cream/gold circular medallion on the leather fob
-    const medallionMat = new THREE.MeshStandardMaterial({
-      map: this.medallionTex,
-      roughness: 0.4
-    });
-    const medallion = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.05, 0.012, 24),
-      medallionMat
-    );
-    medallion.position.set(0, 0.002, -0.012);
-    keyGroup.add(medallion);
-
-    // Silver split key-ring
-    const silverMat = new THREE.MeshStandardMaterial({
-      color: 0xb0aba0,
-      roughness: 0.25,
-      metalness: 0.88
-    });
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.038, 0.004, 10, 24), silverMat);
-    ring.rotation.x = Math.PI / 2;
-    ring.position.set(0.01, 0.004, 0.095);
-    keyGroup.add(ring);
-
-    // Metal key head & notched blade
-    const keyHead = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.036, 0.036, 0.008, 6),
-      silverMat
-    );
-    keyHead.position.set(0.025, 0.004, 0.14);
-    keyHead.castShadow = true;
-    keyGroup.add(keyHead);
-
-    const keyBlade = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.006, 0.12), silverMat);
-    keyBlade.position.set(0.042, 0.004, 0.21);
-    keyBlade.rotation.y = 0.24;
-    keyBlade.castShadow = true;
-    keyGroup.add(keyBlade);
-
-    group.add(keyGroup);
-
-    this.registerInteractiveGroup('prop_dossier', group);
-  }
-
-  /**
-   * Black Vintage 1930s Rotary Telephone (top-right of maxres.jpg & 2.jpg)
+   * 14. Sculpted 1930s Black Bakelite Rotary Telephone (Right-Back Corner of Desk)
    */
   buildRotaryTelephone() {
     const group = new THREE.Group();
     group.name = 'prop_telegram';
-    group.position.set(0.32, 0.8, -0.34);
-    group.rotation.y = -0.48;
+    group.position.set(0.76, 0.808, -0.22);
+    group.rotation.y = -0.52;
 
     const bakeliteMat = new THREE.MeshStandardMaterial({
-      color: 0x0e100f,
-      roughness: 0.22,
+      color: 0x0d0e0d,
+      roughness: 0.18,
       metalness: 0.35
     });
     const brassMat = new THREE.MeshStandardMaterial({
-      color: 0xb58342,
-      roughness: 0.32,
-      metalness: 0.82
+      color: 0xb88642,
+      roughness: 0.3,
+      metalness: 0.85
     });
     const dialFaceMat = new THREE.MeshStandardMaterial({
-      color: 0xf5e2a8,
+      color: 0xf7e4ad,
       emissive: 0x6e5420,
-      emissiveIntensity: 0.45,
-      roughness: 0.3
+      emissiveIntensity: 0.4,
+      roughness: 0.28
     });
 
-    // Lower rectangular base with rounded bevel look
-    const baseBox = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.09, 0.32), bakeliteMat);
-    baseBox.position.y = 0.045;
-    baseBox.castShadow = true;
-    baseBox.receiveShadow = true;
-    group.add(baseBox);
+    // Beveled base using ExtrudeGeometry for smooth rounded Bakelite corners
+    const shape = new THREE.Shape();
+    const w = 0.11;
+    const d = 0.095;
+    const r = 0.022;
+    shape.moveTo(-w + r, -d);
+    shape.lineTo(w - r, -d);
+    shape.quadraticCurveTo(w, -d, w, -d + r);
+    shape.lineTo(w, d - r);
+    shape.quadraticCurveTo(w, d, w - r, d);
+    shape.lineTo(-w + r, d);
+    shape.quadraticCurveTo(-w, d, -w, d - r);
+    shape.lineTo(-w, -d + r);
+    shape.quadraticCurveTo(-w, -d, -w + r, -d);
 
-    // Sloped upper body
+    const extrudeSettings = {
+      depth: 0.048,
+      bevelEnabled: true,
+      bevelSegments: 5,
+      steps: 1,
+      bevelSize: 0.012,
+      bevelThickness: 0.014
+    };
+    const baseGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    baseGeo.rotateX(-Math.PI / 2);
+    const baseMesh = new THREE.Mesh(baseGeo, bakeliteMat);
+    baseMesh.position.y = 0.012;
+    baseMesh.castShadow = true;
+    baseMesh.receiveShadow = true;
+    group.add(baseMesh);
+
+    // Sloped upper pyramid body
     const upperBody = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.14, 0.21, 0.13, 4),
+      new THREE.CylinderGeometry(0.085, 0.135, 0.085, 4),
       bakeliteMat
     );
     upperBody.rotation.y = Math.PI / 4;
-    upperBody.position.set(0, 0.13, -0.01);
+    upperBody.position.set(0, 0.095, -0.008);
     upperBody.castShadow = true;
     group.add(upperBody);
 
-    // Small rectangular copper/brass plate on the front edge (visible in maxres.jpg!)
-    const frontPlate = new THREE.Mesh(new THREE.BoxGeometry(0.085, 0.032, 0.008), brassMat);
-    frontPlate.position.set(0, 0.042, 0.162);
+    // Rectangular brass nameplate on the front base
+    const frontPlate = new THREE.Mesh(new THREE.BoxGeometry(0.056, 0.02, 0.006), brassMat);
+    frontPlate.position.set(0, 0.028, 0.106);
     group.add(frontPlate);
 
-    // Glowing cream/gold rotary dial wheel on the sloped front
+    // Rotary dial wheel & finger holes
     const dialGroup = new THREE.Group();
-    dialGroup.position.set(0, 0.135, 0.11);
+    dialGroup.position.set(0, 0.092, 0.072);
     dialGroup.rotation.x = 0.68;
 
     const dialWheel = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.082, 0.082, 0.014, 24),
+      new THREE.CylinderGeometry(0.056, 0.056, 0.01, 28),
       dialFaceMat
     );
     dialGroup.add(dialWheel);
 
     const dialCenter = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.028, 0.028, 0.018, 16),
+      new THREE.CylinderGeometry(0.019, 0.019, 0.013, 18),
       bakeliteMat
     );
     dialGroup.add(dialCenter);
 
-    // Finger holes around the rotary dial
     for (let i = 0; i < 8; i++) {
       const angle = (i / 10) * Math.PI * 2 + 0.4;
       const hole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.011, 0.011, 0.019, 10),
+        new THREE.CylinderGeometry(0.0075, 0.0075, 0.014, 12),
         bakeliteMat
       );
-      hole.position.set(Math.cos(angle) * 0.054, 0, Math.sin(angle) * 0.054);
+      hole.position.set(Math.cos(angle) * 0.036, 0, Math.sin(angle) * 0.036);
       dialGroup.add(hole);
     }
     group.add(dialGroup);
 
-    // Handset resting on the cradle
+    // Chrome cradle prongs
+    [-0.038, 0.038].forEach((cx) => {
+      const prong = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.006, 0.008, 0.035, 10),
+        brassMat
+      );
+      prong.position.set(cx, 0.145, -0.01);
+      group.add(prong);
+    });
+
+    // Sculpted Curved Handset Bar + Bell Earpieces
+    const handsetCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.105, 0.145, -0.01),
+      new THREE.Vector3(-0.05, 0.168, -0.01),
+      new THREE.Vector3(0.05, 0.168, -0.01),
+      new THREE.Vector3(0.105, 0.145, -0.01)
+    ]);
     const handsetBar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.022, 0.022, 0.34, 14),
+      new THREE.TubeGeometry(handsetCurve, 20, 0.015, 12, false),
       bakeliteMat
     );
-    handsetBar.rotation.z = Math.PI / 2;
-    handsetBar.position.set(0, 0.23, -0.02);
     handsetBar.castShadow = true;
     group.add(handsetBar);
 
-    const leftEar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.035, 0.06, 16),
-      bakeliteMat
-    );
-    leftEar.position.set(-0.15, 0.205, -0.02);
-    group.add(leftEar);
-
-    const rightMouth = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.05, 0.035, 0.06, 16),
-      bakeliteMat
-    );
-    rightMouth.position.set(0.15, 0.205, -0.02);
-    group.add(rightMouth);
+    [-0.105, 0.105].forEach((bx) => {
+      const earCup = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.034, 0.024, 0.042, 20),
+        bakeliteMat
+      );
+      earCup.position.set(bx, 0.132, -0.01);
+      earCup.rotation.z = bx < 0 ? -0.25 : 0.25;
+      earCup.castShadow = true;
+      group.add(earCup);
+    });
 
     this.registerInteractiveGroup('prop_telegram', group);
-  }
-
-  /**
-   * Sepia 1930s Gang Photograph propped on the left side of the desk (seen in 2.jpg)
-   */
-  buildSepiaGangPhoto() {
-    const group = new THREE.Group();
-    group.name = 'prop_operations';
-    group.position.set(-0.74, 0.96, -0.42);
-    group.rotation.y = 0.22;
-    group.rotation.x = -0.18;
-
-    const photoMat = new THREE.MeshStandardMaterial({
-      map: this.photoTex,
-      roughness: 0.55
-    });
-    const backingMat = new THREE.MeshStandardMaterial({
-      color: 0x2b1d12,
-      roughness: 0.8
-    });
-
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.34, 0.015), backingMat);
-    frame.castShadow = true;
-    group.add(frame);
-
-    const photo = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.32), photoMat);
-    photo.position.z = 0.009;
-    group.add(photo);
-
-    this.registerInteractiveGroup('prop_operations', group);
   }
 
   registerInteractiveGroup(name, group) {
@@ -658,38 +1146,28 @@ export class Room {
       const targetGroup = this.interactiveGroups.get(groupName);
       if (!targetGroup) return;
 
-      this.gltfLoader.load(
-        cfg.modelPath,
-        (gltf) => {
-          while (targetGroup.children.length > 0) {
-            targetGroup.remove(targetGroup.children[0]);
-          }
-          const model = gltf.scene;
-          model.scale.setScalar(cfg.scale ?? 1.0);
-          if (cfg.positionOffset) {
-            model.position.set(
-              cfg.positionOffset.x || 0,
-              cfg.positionOffset.y || 0,
-              cfg.positionOffset.z || 0
-            );
-          }
-          model.traverse((child) => {
-            if (child.isMesh) {
-              child.castShadow = true;
-              child.receiveShadow = true;
-              child.userData.interactiveParent = groupName;
-            }
-          });
-          targetGroup.add(model);
-        },
-        undefined,
-        (err) => {
-          console.warn(
-            `[Mafia Scene] Could not load custom model "${cfg.modelPath}" for "${key}".`,
-            err
+      this.gltfLoader.load(cfg.modelPath, (gltf) => {
+        while (targetGroup.children.length > 0) {
+          targetGroup.remove(targetGroup.children[0]);
+        }
+        const model = gltf.scene;
+        model.scale.setScalar(cfg.scale ?? 1.0);
+        if (cfg.positionOffset) {
+          model.position.set(
+            cfg.positionOffset.x || 0,
+            cfg.positionOffset.y || 0,
+            cfg.positionOffset.z || 0
           );
         }
-      );
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.userData.interactiveParent = groupName;
+          }
+        });
+        targetGroup.add(model);
+      });
     });
   }
 }
